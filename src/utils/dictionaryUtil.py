@@ -3,7 +3,7 @@ import json
 import numpy as np 
 import pickle
 
-class dictionaryUtil:
+class DictionaryUtil:
 	def __init__(self, dictionary, filePath) -> None:
 		self.dictionary = dictionary
 		self.filePath = filePath
