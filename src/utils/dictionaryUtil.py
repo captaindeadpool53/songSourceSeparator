@@ -14,6 +14,7 @@ class DictionaryUtil:
 		if dictionary!=None:
 			self.validateDictionary()
 
+
 	def validateFilePath(self):
 		if not os.path.exists(self.filePath):
 			print("File path does not exist")
@@ -44,7 +45,7 @@ class DictionaryUtil:
 
 		except Exception as e:
 			print("Error in saveAsNpy:" + str(e))
-		
+
 	def loadFromNpy(self):
 		try:
 			self.dictionary = np.load(self.filePath).items()
@@ -52,5 +53,4 @@ class DictionaryUtil:
 
 		except Exception as e:
 			print("Error in loadFromNpy:" + str(e))
-
 
