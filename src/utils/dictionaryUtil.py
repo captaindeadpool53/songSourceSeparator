@@ -3,13 +3,17 @@ import json
 import numpy as np 
 import pickle
 
-class dictionaryUtil:
-	def __init__(self, dictionary, filePath) -> None:
+class DictionaryUtil:
+	def __init__(self, dictionary, filePath, fileName) -> None:
 		self.dictionary = dictionary
-		self.filePath = filePath
+		self.filePath = filePath + fileName
 
-		self.validateFilePath()
-		self.validateDictionary()
+		if filePath != None:
+			self.validateFilePath()
+
+		if dictionary!=None:
+			self.validateDictionary()
+
 
 	def validateFilePath(self):
 		if not os.path.exists(self.filePath):
@@ -42,4 +46,11 @@ class dictionaryUtil:
 		except Exception as e:
 			print("Error in saveAsNpy:" + str(e))
 
+	def loadFromNpy(self):
+		try:
+			self.dictionary = np.load(self.filePath).items()
+			return self.dictionary
+
+		except Exception as e:
+			print("Error in loadFromNpy:" + str(e))
 
