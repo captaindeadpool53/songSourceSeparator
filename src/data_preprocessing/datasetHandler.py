@@ -2,29 +2,31 @@ import os
 import numpy as np
 from config.constants import Constants
 from src.data_preprocessing.audioLoader import AudioLoader
-from src.data_preprocessing.spectrogramHandler import LogSpectrogramExtractor, Spectrogram, SpectrogramExtractor
+from src.data_preprocessing.spectrogramHandler import Spectrogram
 from src.utils.dictionaryUtil import DictionaryUtil
 import tensorflow as tf
 
 class DatasetHandler:
-	def __init__(self, rootPath: str, sampleRate:int, trackLength: float, frameSize:int, hopLength:int) -> None:
+	def __init__(self, rootPath: str, sampleRate:int, segmentLength: float, frameSize:int, hopLength:int) -> None:
 		self.rootPath: str = rootPath
 		self.sampleRate: int = sampleRate
-		self.trackLength: float = trackLength
+		self.segmentLength: float = segmentLength
 		self.frameSize: int = frameSize
 		self.hopLength: int = hopLength
 		self.audioData: dict = {}
 		self.spectrogramData: dict = {}
 		self.idCounter: int = 0
 
-		self.spectrogramDataset: tf.Dataset = None
-		self.trainingDataset: tf.Dataset = None
-		self.testingDataset: tf.Dataset	= None
+		self.spectrogramDataset: tf.data.Dataset = None
+		self.trainingDataset: tf.data.Dataset = None
+		self.testingDataset: tf.data.Dataset	= None
 
-		self.totalSamples = self.trackLength * self.sampleRate
-		self.framesInTrack = 1 + (self.totalSamples - self.frameSize)//self.hopLength
+		self.samplesPerSegment = self.segmentLength * self.sampleRate
+		self.framesInSegment = 1 + (self.samplesPerSegment - self.frameSize)//self.hopLength
 		self.frequencyBins = 1 + self.frameSize//2
-		self.spectrogramShape = [self.framesInTrack, self.frequencyBins, 1]
+		self.spectrogramShape = [self.framesInSegment, self.frequencyBins, 1]
+		self.outputShape = []
+		self.numberOfOutputLayers = None
 
 		
 
@@ -38,35 +40,70 @@ class DatasetHandler:
 				for folder in folders:
 					targetFilesPath = root + folder + Constants.TRAINING_DATA_RELATIVE_PATH_DRUMS.value
 					
-					#try using a matrix
+					# Can be made dynamic
 					mixTrack = AudioLoader.loadAudioFile( root + folder + Constants.MIX.value , self.sampleRate)
 					drumsTrack = AudioLoader.loadAudioFile(targetFilesPath +  Constants.DRUMS.value , self.sampleRate)
 					accompanimentsTrack =  AudioLoader.loadAudioFile(targetFilesPath + Constants.ACCOMPANIMENTS.value, self.sampleRate)
 					
-					#segmenting audio file
-					mixTracks, drumsTracks, accompanimentsTracks = self._segmentAudioFiles([mixTrack, drumsTrack, accompanimentsTrack])
+					exampleTrack = np.stack([mixTrack, drumsTrack, accompanimentsTrack])
+					segments = self._segmentAudioFiles(exampleTrack)
 
-					audioFileData = {
-						"mix": mixTrack,
-						"drums": drumsTrack,
-						"accompaniments": accompanimentsTrack
-					}
-					self.audioData[folder] = audioFileData
+					for segment in segments:
+						audioFileData = {
+							"mix": segment[0],
+							"drums": segment[1],
+							"accompaniments": segment[2]
+						}
+						self.audioData[self.idCounter] = audioFileData
+						self.idCounter	+= 1
 
 			else:
 				break
-	
-	def _segmentAudioFiles(self, exampleTracks):
-		numberOfPossibleSegments = self._calculateNumberOfPossibleSegments(exampleTracks[0])
 
-		segments = []
+
+	"""
+	Returns shape (numberOfPossibleSegments, trackTypes, samplesPerSegment)
+	"""
+	def _segmentAudioFiles(self, exampleTracks: np.ndarray) -> np.ndarray :
+		numberOfPossibleSegments = self._calculateNumberOfPossibleSegments(exampleTracks[0])
+		trackTypes = exampleTracks.shape[0]                                                     # mix, drums, accompaniments for example
+		segments = np.array([])
+
 		for currentSegment in range(1,numberOfPossibleSegments):
-			segments.
-		# Add segments in an array for all the tracks then return it efficiently
+			segmentsForAllTrackTypes = np.array([])
+
+			for trackType in range(trackTypes): 
+				trackSegment = exampleTracks[trackType, currentSegment*self.samplesPerSegment : (currentSegment+1)*self.samplesPerSegment]
+
+				if self._isPaddingRequired(trackSegment):
+					trackSegment = self._padAtEnd(trackSegment)
+
+				if len(segmentsForAllTrackTypes) == 0:
+					segmentsForAllTrackTypes = trackSegment
+				else:
+					segmentsForAllTrackTypes = np.stack([segmentsForAllTrackTypes, trackSegment])
+			
+			if len(segments) == 0:
+				segments = segmentsForAllTrackTypes
+			else:
+				segments = np.stack([segments, segmentsForAllTrackTypes])
+		
+		return segments
+
+
+	def _padAtEnd(self, trackSegment):
+		samplesToPad = self.samplesPerSegment - len(trackSegment)
+
+		paddedSegment = np.pad(trackSegment, (0, samplesToPad))
+		return paddedSegment
+
+
+	def _isPaddingRequired(self, segments):
+		return len(segments)<self.samplesPerSegment
 
 
 	def _calculateNumberOfPossibleSegments(self, exampleTrack):
-		return  int(np.ceil(len(exampleTrack)/(self.trackLength*self.sampleRate)))
+		return  int(np.ceil(len(exampleTrack)/(self.segmentLength*self.sampleRate)))
 
 
 	def convertToSpectrogramData(self):
@@ -98,16 +135,17 @@ class DatasetHandler:
 	def convertToDataset(self):
 		if len(self.spectrogramData)<0:
 			self._loadSpectrogramDataset()
-		
+
+		self.numberOfOutputLayers = len(self.spectrogramData.values[0])-1
+		self.outputShape = self.spectrogramShape[:-1] + [self.numberOfOutputLayers]
 		self.spectrogramDataset = tf.data.Dataset.from_generator(
 			self.datasetGenerator,
-			args = (self),
-			output_shapes =( tf.TensorShape(self.spectrogramShape), tf.TensorShape(self.spectrogramShape))    
+			output_shapes =( tf.TensorShape(self.spectrogramShape), tf.TensorShape(self.outputShape))    
 		)
 
 
 	def datasetGenerator(self):
-		X, Y= np.array()
+		X, Y= np.array([])
 		for trackName, trackData in self.spectrogramData.items():
 			x = np.array(trackData['mix'])
 			y = np.stack(
@@ -126,8 +164,21 @@ class DatasetHandler:
 			
 
 	def splitDataset(self):
+		self.spectrogramDataset.shuffle(buffer_size= len( self.spectrogramDataset )).batch(batch_size=32)
 		self.trainingDataset = self.spectrogramDataset.take(int( 0.8*len( self.spectrogramDataset )))
 		self.testingDataset = self.spectrogramDataset.skip(int( 0.8*len( self.spectrogramDataset )))
+
+	def cacheDataset(self, dataSetType: Constants):
+		if dataSetType == Constants.TRAINING_DATA:
+			self.trainingDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
+
+		elif dataSetType == Constants.TEST_DATA:
+			self.testingDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
+		
+		else:
+			self.trainingDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
+			self.testingDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
+
 	
 	def getDatasets(self):
 		return self.trainingDataset, self.testingDataset

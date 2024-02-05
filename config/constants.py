@@ -11,5 +11,10 @@ class Constants(Enum):
 	ACCOMPANIMENTS = 'accompaniments.wav'
 	MIX = 'mix.wav'
 
+	#Dataset types
+	TRAINING_DATA = 'training'
+	TEST_DATA = 'test'
+
+
 
 
