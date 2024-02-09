@@ -1,0 +1,3 @@
+[submodule "src/utils/slakh-utils"]
+	path = src/utils/slakh-utils
+	url = https://github.com/captaindeadpool53/slakh-utils.git
