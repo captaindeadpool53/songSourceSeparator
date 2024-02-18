@@ -12,6 +12,13 @@ class DirectoryHandler:
 					if(os.path.splitext(folder)[0] == target):
 						shutil.rmtree(os.path.join(root, folder))
 
-
+	"""
+	For windows path issue
+ 	"""
+	@staticmethod
+	def joinPath(path1, path2):
+		path = os.path.join(path1, path2)
+		path = path.replace('\\','/')
+		return path
 # if __name__ == "__main__":
 # 	DirectoryAndFileHandler.deleteAllOcurrancesOfDirectory("data/babyslakh_16k","training_data_drums")

@@ -7,7 +7,7 @@ class AudioLoader:
         pass
 
     @staticmethod
-    def loadAudioFile(filePath, sampleRate, duration, mono):
+    def loadAudioFile(filePath, sampleRate, duration = None, mono = True):
         signal = librosa.load(filePath,
                               sr=sampleRate,
                               duration=duration,

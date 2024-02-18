@@ -1,9 +1,5 @@
-from locale import normalize
-from multiprocessing import pool
-from typing import Self
 import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras import layers, activations, losses, Model
+from tensorflow.keras import layers, activations, Model
 
 
 class UNET(Model):
@@ -13,7 +9,7 @@ class UNET(Model):
 
 			self.convLayer = layers.Conv2D(filters=filters, kernel_size=3, padding=(1,1),strides=(1, 1))
 			self.batchNormalisation = layers.BatchNormalization()
-			self.reluLayer = activations.relu()
+			self.reluLayer = layers.Activation(activations.relu())
 		
 		def call(self, input: tf.Tensor)->tf.Tensor:
 			layerOutput = self.convLayer(input)
@@ -28,7 +24,7 @@ class UNET(Model):
 
 			self.transposeConvBlock = layers.Conv2DTranspose(filters=filters, kernel_size=(3,3), strides=(2,2), padding="same")
 			self.batchNormalisation = layers.BatchNormalization()
-			self.reluLayer = activations.relu()
+			self.reluLayer = layers.Activation(activations.relu())
 
 		def call(self, input: tf.Tensor) -> tf.Tensor:
 			layerOutput = self.transposeConvBlock(input)
@@ -59,7 +55,7 @@ class UNET(Model):
 
 			self.transposeConvBlock = layers.Conv2DTranspose(filters=filters, kernel_size=(5,5), strides=(2,2), padding=(2,2))
 			self.batchNormalisation = layers.BatchNormalization()
-			self.reluLayer = activations.relu()
+			self.reluLayer = layers.Activation(activations.relu())
 			self.dropoutLayer = layers.Dropout(0.4)
 			self.tranConvBlock1 = UNET.transposeConvolutionalBlock(filters)
 			self.tranConvBlock2 = UNET.transposeConvolutionalBlock(filters)
@@ -77,10 +73,10 @@ class UNET(Model):
 			return blockOutput
 	
 
-	def __init__(self, inputShape, outputLayers):
+	def __init__(self, inputShape, outputChannels):
 		self.inputShape = inputShape
-		self.outputShape = inputShape[:-1] + [outputLayers]
-		self.outputLayers = outputLayers
+		self.outputShape = inputShape[:-1] + [outputChannels]
+		self.outputLayers = outputChannels
 
 		self.encoderBlock1 = UNET.EncoderBlock(32)
 		self.encoderBlock2  = UNET.EncoderBlock(64)
@@ -117,3 +113,5 @@ class UNET(Model):
 		blockOutput = self.finalConvLayer(blockOutput)
 
 		return blockOutput
+
+	

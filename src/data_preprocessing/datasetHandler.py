@@ -1,10 +1,13 @@
 import os
+from xmlrpc.client import Boolean
 import numpy as np
 from config.constants import Constants
 from src.data_preprocessing.audioLoader import AudioLoader
 from src.data_preprocessing.spectrogramHandler import Spectrogram
 from src.utils.dictionaryUtil import DictionaryUtil
 import tensorflow as tf
+
+from src.utils.directoryHandler import DirectoryHandler
 
 class DatasetHandler:
 	def __init__(self, rootPath: str, sampleRate:int, segmentLength: float, frameSize:int, hopLength:int) -> None:
@@ -15,7 +18,7 @@ class DatasetHandler:
 		self.hopLength: int = hopLength
 		self.audioData: dict = {}
 		self.spectrogramData: dict = {}
-		self.idCounter: int = 0
+		self.totalTrainingExamples: int = 0
 
 		self.spectrogramDataset: tf.data.Dataset = None
 		self.trainingDataset: tf.data.Dataset = None
@@ -26,24 +29,28 @@ class DatasetHandler:
 		self.frequencyBins = 1 + self.frameSize//2
 		self.spectrogramShape = [self.framesInSegment, self.frequencyBins, 1]
 		self.outputShape = []
-		self.numberOfOutputLayers = None
+		self.numberOfOutputChannels = None
 
 		
 
 	"""
 	Loads all the training examples in the form of wav audio files from the root path
 	"""
-	def loadAudioData(self):
-		self.idCounter = 0
+	def loadAudioData(self) -> None:
+		self.totalTrainingExamples = 0
 		for root, folders, files in os.walk(self.rootPath):
 			if root == self.rootPath:
 				for folder in folders:
-					targetFilesPath = root + folder + Constants.TRAINING_DATA_RELATIVE_PATH_DRUMS.value
+					targetFolderPath = DirectoryHandler.joinPath(root, folder)
+					targetFilesPath = DirectoryHandler.joinPath(targetFolderPath, Constants.TRAINING_DATA_RELATIVE_PATH_DRUMS.value)
 					
-					# Can be made dynamic
-					mixTrack = AudioLoader.loadAudioFile( root + folder + Constants.MIX.value , self.sampleRate)
-					drumsTrack = AudioLoader.loadAudioFile(targetFilesPath +  Constants.DRUMS.value , self.sampleRate)
-					accompanimentsTrack =  AudioLoader.loadAudioFile(targetFilesPath + Constants.ACCOMPANIMENTS.value, self.sampleRate)
+					mixTrackPath = DirectoryHandler.joinPath(targetFolderPath,Constants.MIX.value) 
+					drumsTrackPath = DirectoryHandler.joinPath(targetFilesPath, Constants.DRUMS.value)
+					accompanimentsTrackPath = DirectoryHandler.joinPath(targetFilesPath, Constants.ACCOMPANIMENTS.value)
+     
+					mixTrack = AudioLoader.loadAudioFile( mixTrackPath , self.sampleRate)
+					drumsTrack = AudioLoader.loadAudioFile(drumsTrackPath , self.sampleRate)
+					accompanimentsTrack =  AudioLoader.loadAudioFile(accompanimentsTrackPath, self.sampleRate)
 					
 					exampleTrack = np.stack([mixTrack, drumsTrack, accompanimentsTrack])
 					segments = self._segmentAudioFiles(exampleTrack)
@@ -54,8 +61,9 @@ class DatasetHandler:
 							"drums": segment[1],
 							"accompaniments": segment[2]
 						}
-						self.audioData[self.idCounter] = audioFileData
-						self.idCounter	+= 1
+						self.totalTrainingExamples	+= 1
+						self.audioData[self.totalTrainingExamples] = audioFileData
+						
 
 			else:
 				break
@@ -77,16 +85,18 @@ class DatasetHandler:
 
 				if self._isPaddingRequired(trackSegment):
 					trackSegment = self._padAtEnd(trackSegment)
-
+				
+				trackSegment = trackSegment[np.newaxis, ...]
 				if len(segmentsForAllTrackTypes) == 0:
 					segmentsForAllTrackTypes = trackSegment
 				else:
-					segmentsForAllTrackTypes = np.stack([segmentsForAllTrackTypes, trackSegment])
+					segmentsForAllTrackTypes = np.concatenate([segmentsForAllTrackTypes, trackSegment])
 			
+			segmentsForAllTrackTypes = segmentsForAllTrackTypes[np.newaxis, ...]
 			if len(segments) == 0:
 				segments = segmentsForAllTrackTypes
 			else:
-				segments = np.stack([segments, segmentsForAllTrackTypes])
+				segments = np.concatenate([segments, segmentsForAllTrackTypes])
 		
 		return segments
 
@@ -106,7 +116,10 @@ class DatasetHandler:
 		return  int(np.ceil(len(exampleTrack)/(self.segmentLength*self.sampleRate)))
 
 
-	def convertToSpectrogramData(self):
+	def convertToSpectrogramData(self) -> None:
+		if not self.audioData:
+			self._loadSavedAudioData()
+   
 		for trackName, trackData in self.audioData.items():
 			spectrogramData = {}
 
@@ -116,6 +129,19 @@ class DatasetHandler:
 
 			self.spectrogramData[trackName] = spectrogramData
 
+	def _isSavedSpectrogramDataAvailable(self):
+		filePath = DirectoryHandler.joinPath(Constants.DICTIONAY_SAVE_PATH.value, 'spectrogramData.npy')
+  
+		if os.path.exists(filePath):
+			return True
+		return False
+
+	def _isSavedAudioDataAvailable(self):
+		filePath = DirectoryHandler.joinPath(Constants.DICTIONAY_SAVE_PATH.value, 'audioData.npy')
+  
+		if os.path.exists(filePath):
+			return True
+		return False
 
 	def saveDataAsDictionary(self):
 		dictionaryUtil = DictionaryUtil(self.audioData, Constants.DICTIONAY_SAVE_PATH.value, 'audioData.npy')
@@ -127,20 +153,27 @@ class DatasetHandler:
 		dictionaryUtil.saveAsNpy()
 	
 
-	def _loadSpectrogramDataset(self):
+	def _loadSavedSpectrogramData(self):
 		dictionaryUtil = DictionaryUtil(None, Constants.DICTIONAY_SAVE_PATH.value, 'spectrogramData.npy')
 		self.spectrogramData = dictionaryUtil.loadFromNpy()
 
+	def _loadSavedAudioData(self):
+		dictionaryUtil = DictionaryUtil(None, Constants.DICTIONAY_SAVE_PATH.value, 'spectrogramData.npy')
+		self.spectrogramData = dictionaryUtil.loadFromNpy()
 	
 	def convertToDataset(self):
-		if len(self.spectrogramData)<0:
-			self._loadSpectrogramDataset()
+		if not self.spectrogramData:
+			self._loadSavedSpectrogramData()
 
-		self.numberOfOutputLayers = len(self.spectrogramData.values[0])-1
-		self.outputShape = self.spectrogramShape[:-1] + [self.numberOfOutputLayers]
+		self.numberOfOutputChannels = len(list(self.spectrogramData.values())[0])-1
+		self.outputShape = self.spectrogramShape[:-1] + [self.numberOfOutputChannels]
+		outputSignature = (
+			tf.TensorSpec(shape=self.spectrogramShape, dtype=tf.float32),
+			tf.TensorSpec(shape=self.outputShape, dtype=tf.float32)
+		)
 		self.spectrogramDataset = tf.data.Dataset.from_generator(
 			self.datasetGenerator,
-			output_shapes =( tf.TensorShape(self.spectrogramShape), tf.TensorShape(self.outputShape))    
+			output_signature = outputSignature    
 		)
 
 
@@ -164,9 +197,9 @@ class DatasetHandler:
 			
 
 	def splitDataset(self):
-		self.spectrogramDataset.shuffle(buffer_size= len( self.spectrogramDataset )).batch(batch_size=32)
-		self.trainingDataset = self.spectrogramDataset.take(int( 0.8*len( self.spectrogramDataset )))
-		self.testingDataset = self.spectrogramDataset.skip(int( 0.8*len( self.spectrogramDataset )))
+		self.spectrogramDataset.shuffle(buffer_size= self.totalTrainingExamples ).batch(batch_size=Constants.BATCH_SIZE.value)
+		self.trainingDataset = self.spectrogramDataset.take(int( 0.8*self.totalTrainingExamples))
+		self.testingDataset = self.spectrogramDataset.skip(int( 0.8*self.totalTrainingExamples))
 
 	def cacheDataset(self, dataSetType: Constants):
 		if dataSetType == Constants.TRAINING_DATA:
@@ -182,8 +215,41 @@ class DatasetHandler:
 	
 	def getDatasets(self):
 		return self.trainingDataset, self.testingDataset
+	
+	def getShapeData(self):
+		return self.spectrogramShape, self.numberOfOutputChannels
 
+	
+	"""
+ 	Loading data from scratch only if it is passed as an argument isForceStart or if pre-saved files are not found.
+	If saved data is found, it loads the saved data and skips on preprocessing and saving it.
+  	"""
+	def loadAndPreprocessData(self, isForceStart: bool = False):
+		areSavedAudioUsed = False
+		areSavedSprectrogramsUsed = False
+	
+		if not isForceStart:
+			if self._isSavedAudioDataAvailable():
+				self._loadSavedAudioData()
+				areSavedAudioUsed = True
+    
+			if self._isSavedSpectrogramDataAvailable():
+				self._loadSavedSpectrogramData
+				areSavedSprectrogramsUsed = True
+    
+		if isForceStart or not self.audioData:
+			self.loadAudioData()
+		if isForceStart or not self.spectrogramData:
+			self.convertToSpectrogramData()
+		if isForceStart or not areSavedAudioUsed:
+			self.saveDataAsDictionary()
+		if isForceStart or not areSavedSprectrogramsUsed:
+			self.saveSpectrograms()
 
+		self.convertToDataset()
+		self.splitDataset()
+  
+  
 
 
 #Suggestion: add function to save spectrograms as images for better visual help
