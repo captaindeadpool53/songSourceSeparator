@@ -174,7 +174,7 @@ class DatasetHandler:
 			tf.TensorSpec(shape=self.outputShape, dtype=tf.float32)
 		)
 		self.spectrogramDataset = tf.data.Dataset.from_generator(
-			self.datasetGenerator,
+			DatasetHandler.datasetGenerator,
 			args = [self.spectrogramData],
 			output_signature = outputSignature    
 		)
