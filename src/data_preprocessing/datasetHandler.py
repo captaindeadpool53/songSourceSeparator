@@ -173,13 +173,14 @@ class DatasetHandler:
 		)
 		self.spectrogramDataset = tf.data.Dataset.from_generator(
 			self.datasetGenerator,
+			args = [self.spectrogramData],
 			output_signature = outputSignature    
 		)
 
-
-	def datasetGenerator(self):
+	@staticmethod
+	def datasetGenerator(spectrogramData: dict):
 		X, Y= np.array([])
-		for trackName, trackData in self.spectrogramData.items():
+		for trackName, trackData in spectrogramData.items():
 			x = np.array(trackData['mix'])
 			y = np.stack(
 					[np.array(trackData['drums']) , np.array(trackData['accompaniments'])],
