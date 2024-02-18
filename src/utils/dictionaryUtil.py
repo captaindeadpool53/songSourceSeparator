@@ -3,21 +3,19 @@ import json
 import numpy as np 
 import pickle
 
+from src.utils.directoryHandler import DirectoryHandler
+
 class DictionaryUtil:
 	def __init__(self, dictionary, filePath, fileName) -> None:
+		self.fileName = fileName
 		self.dictionary = dictionary
-		self.filePath = filePath + fileName
-
-		if filePath != None:
-			self.validateFilePath()
-
+		os.makedirs(filePath, exist_ok=True)
+    
+		self.filePath = DirectoryHandler.joinPath(filePath, fileName)
+  
 		if dictionary!=None:
 			self.validateDictionary()
 
-
-	def validateFilePath(self):
-		if not os.path.exists(self.filePath):
-			print("File path does not exist")
 
 	def validateDictionary(self):
 		if not isinstance(self.dictionary, dict):
@@ -41,14 +39,22 @@ class DictionaryUtil:
 
 	def saveAsNpy(self):
 		try:
+			print(f"::: Saving in progress for file name - {self.fileName} :::")
+   
 			np.save(self.filePath, self.dictionary)
+   
+			print(f"::: Save complete for file name - {self.fileName} :::")
 
 		except Exception as e:
 			print("Error in saveAsNpy:" + str(e))
 
 	def loadFromNpy(self):
 		try:
-			self.dictionary = np.load(self.filePath).items()
+			print(f"::: Loading in progress for file name - {self.fileName} :::")
+			
+			self.dictionary = np.load(self.filePath, allow_pickle=True).item()
+   
+			print(f"::: Load complete for file name - {self.fileName} :::")
 			return self.dictionary
 
 		except Exception as e:
