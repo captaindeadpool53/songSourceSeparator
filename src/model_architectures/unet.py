@@ -113,5 +113,3 @@ class UNET(Model):
 		blockOutput = self.finalConvLayer(blockOutput)
 
 		return blockOutput
-
-	
