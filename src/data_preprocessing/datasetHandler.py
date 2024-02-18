@@ -1,5 +1,7 @@
 import os
 from xmlrpc.client import Boolean
+import librosa
+from matplotlib import pyplot as plt
 import numpy as np
 from config.constants import Constants
 from src.data_preprocessing.audioLoader import AudioLoader
@@ -249,6 +251,19 @@ class DatasetHandler:
 
 		self.convertToDataset()
 		self.splitDataset()
+  
+	def visualise_spectrogram_for_whole_song(self, spectrogram: np.array):
+		plt.figure(figsize=(15, 10))
+		try:
+			librosa.display.specshow( spectrogram, x_axis="time", y_axis="log", sr=self.sampleRate, hop_length=self.hopLength)
+		except TypeError as e:
+			raise TypeError(e.message)
+
+		colorbar = plt.colorbar(
+			format="%2.f",
+		)  # adds a colorbar for different intensity levels
+		colorbar.ax.set_title("db")
+		plt.show()
   
   
 
