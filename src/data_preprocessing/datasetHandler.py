@@ -182,7 +182,8 @@ class DatasetHandler:
 
 	@staticmethod
 	def datasetGenerator(spectrogramData: dict):
-		X, Y= np.array([])
+		X= np.array([])
+		Y= np.array([])
 		for trackName, trackData in spectrogramData.items():
 			x = np.array(trackData['mix'])
 			y = np.stack(
