@@ -74,6 +74,7 @@ class UNET(Model):
 	
 
 	def __init__(self, inputShape, outputChannels):
+		super().__init__()
 		self.inputShape = inputShape
 		self.outputShape = inputShape[:-1] + [outputChannels]
 		self.outputLayers = outputChannels
