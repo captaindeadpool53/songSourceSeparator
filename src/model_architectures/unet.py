@@ -9,7 +9,7 @@ class UNET(Model):
 
 			self.convLayer = layers.Conv2D(filters=filters, kernel_size=3, padding=(1,1),strides=(1, 1))
 			self.batchNormalisation = layers.BatchNormalization()
-			self.reluLayer = layers.Activation(activations.relu())
+			self.reluLayer = layers.Activation('relu')
 		
 		def call(self, input: tf.Tensor)->tf.Tensor:
 			layerOutput = self.convLayer(input)
@@ -24,7 +24,7 @@ class UNET(Model):
 
 			self.transposeConvBlock = layers.Conv2DTranspose(filters=filters, kernel_size=(3,3), strides=(2,2), padding="same")
 			self.batchNormalisation = layers.BatchNormalization()
-			self.reluLayer = layers.Activation(activations.relu())
+			self.reluLayer = layers.Activation('relu')
 
 		def call(self, input: tf.Tensor) -> tf.Tensor:
 			layerOutput = self.transposeConvBlock(input)
@@ -55,7 +55,7 @@ class UNET(Model):
 
 			self.transposeConvBlock = layers.Conv2DTranspose(filters=filters, kernel_size=(5,5), strides=(2,2), padding=(2,2))
 			self.batchNormalisation = layers.BatchNormalization()
-			self.reluLayer = layers.Activation(activations.relu())
+			self.reluLayer = layers.Activation('relu')
 			self.dropoutLayer = layers.Dropout(0.4)
 			self.tranConvBlock1 = UNET.transposeConvolutionalBlock(filters)
 			self.tranConvBlock2 = UNET.transposeConvolutionalBlock(filters)
