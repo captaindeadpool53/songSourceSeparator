@@ -174,17 +174,15 @@ class DatasetHandler:
 			tf.TensorSpec(shape=self.outputShape, dtype=tf.float32)
 		)
 		self.spectrogramDataset = tf.data.Dataset.from_generator(
-
-			DatasetHandler.datasetGenerator,
-			args = [self.spectrogramData],
+			self.datasetGenerator,
 			output_signature = outputSignature    
 		)
 
-	@staticmethod
-	def datasetGenerator(spectrogramData: dict):
+	
+	def datasetGenerator(self):
 		X= np.array([])
 		Y= np.array([])
-		for trackName, trackData in spectrogramData.items():
+		for trackName, trackData in self.spectrogramData.items():
 			x = np.array([np.newaxis, trackData['mix']])
 			y = np.stack(
 					[np.array(trackData['drums']) , np.array(trackData['accompaniments'])],
