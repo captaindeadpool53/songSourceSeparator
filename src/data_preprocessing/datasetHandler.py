@@ -174,29 +174,32 @@ class DatasetHandler:
 			tf.TensorSpec(shape=self.outputShape, dtype=tf.float32)
 		)
 		self.spectrogramDataset = tf.data.Dataset.from_generator(
-
-			DatasetHandler.datasetGenerator,
-			args = [self.spectrogramData],
+			self.datasetGenerator,
 			output_signature = outputSignature    
 		)
 
-	@staticmethod
-	def datasetGenerator(spectrogramData: dict):
+
+	def datasetGenerator(self):
 		X= np.array([])
 		Y= np.array([])
-		for trackName, trackData in spectrogramData.items():
-			x = np.array(trackData['mix'])
+		for trackName, trackData in self.spectrogramData.items():
+			x = np.array([np.newaxis, trackData['mix']])
 			y = np.stack(
 					[np.array(trackData['drums']) , np.array(trackData['accompaniments'])],
 					-1
 				)
 			
-			if len(x.shape) == 2:
-				x = tf.expand_dims(x, -1)
-				y = tf.expand_dims(y, -1)
+			# if len(x.shape) == 2:
+			# 	x = tf.expand_dims(x, -1)
+    
+			if len(x.shape) == 3:
+				x = x[np.newaxis, ...]
+    
+			if len(y.shape) == 3:
+				y = y[np.newaxis, ...]
 
-			X = np.append(X, x)
-			Y = np.append(Y, y)
+			X = np.concatenate([X, x], axis=0)
+			Y = np.concatenate([Y, y], axis=0)
 
 		yield (X, Y)
 			
