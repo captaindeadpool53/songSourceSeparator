@@ -1,2 +1,16 @@
 #dataset
 data/babyslakh_16k
+config/__pycache__/__init__.cpython-311.pyc
+config/__pycache__/constants.cpython-311.pyc
+data/dictionaries/audioData.npy
+data/dictionaries/spectrogramData.npy
+src/__pycache__/__init__.cpython-311.pyc
+src/data_preprocessing/__pycache__/audioLoader.cpython-311.pyc
+src/data_preprocessing/__pycache__/spectrogramHandler.cpython-311.pyc
+src/evaluation/__pycache__/evaluationHandler.cpython-311.pyc
+src/data_preprocessing/__pycache__/datasetHandler.cpython-311.pyc
+src/model_architectures/__pycache__/unet.cpython-311.pyc
+.gitignore
+src/utils/__pycache__/dictionaryUtil.cpython-311.pyc
+src/utils/__pycache__/directoryHandler.cpython-311.pyc
+SongSourceSeperator.code-workspace
