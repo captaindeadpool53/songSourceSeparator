@@ -178,7 +178,7 @@ class DatasetHandler:
 			output_signature = outputSignature    
 		)
 
-	
+
 	def datasetGenerator(self):
 		X= np.array([])
 		Y= np.array([])
