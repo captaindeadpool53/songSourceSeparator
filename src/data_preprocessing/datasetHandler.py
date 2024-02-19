@@ -180,8 +180,8 @@ class DatasetHandler:
 
 
 	def datasetGenerator(self):
-		X= np.array([])
-		Y= np.array([])
+		X= []
+		Y= []
 		for trackName, trackData in self.spectrogramData.items():
 			x = np.array(trackData['mix'])
 			y = np.stack(
@@ -197,10 +197,13 @@ class DatasetHandler:
     
 			if len(y.shape) == 3:
 				y = y[np.newaxis, ...]
+			
+			
+			X.append(x)
+			Y.append(y)
 
-			X = np.concatenate([X, x], axis=0)
-			Y = np.concatenate([Y, y], axis=0)
-
+		X = np.concatenate(X, axis=0)
+		Y = np.concatenate(Y, axis=0)
 		yield (X, Y)
 			
 
