@@ -127,8 +127,8 @@ class UNET(Model):
 	'''
 	def _padInputForDivisibility(self, input: tf.Tensor):
 			
-		input, heightwisePadding = self._padSymmetrically(input, input[1], "height")	
-		input, widthwisePadding = self._padSymmetrically(input, input[2], "width")			
+		input, heightwisePadding = self._padSymmetrically(input, input.shape[1], "height")	
+		input, widthwisePadding = self._padSymmetrically(input, input.shape[2], "width")			
 			
 		self.croppingValues = (heightwisePadding, widthwisePadding)
 		return input
