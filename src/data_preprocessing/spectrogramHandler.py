@@ -11,7 +11,7 @@ class Spectrogram:
 
     @staticmethod
     def extractLogSpectrogram(signal, frameSize, hopLength):
-        stft = librosa.stft(signal, n_fft = frameSize, hop_length = hopLength) #[:-1]
+        stft = librosa.stft(signal, n_fft = frameSize, hop_length = hopLength, center=False) #[:-1]
         spectrogram = np.abs(stft)                                             
         logSpectrogram = librosa.amplitude_to_db(spectrogram)
 
