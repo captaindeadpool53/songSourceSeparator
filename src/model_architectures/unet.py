@@ -7,7 +7,7 @@ class UNET(Model):
 		def __init__(self, filters):
 			super().__init__()
 
-			self.convLayer = layers.Conv2D(filters=filters, kernel_size=3, padding=(1,1),strides=(1, 1))
+			self.convLayer = layers.Conv2D(filters=filters, kernel_size=3, padding="same",strides=(1, 1))
 			self.batchNormalisation = layers.BatchNormalization()
 			self.reluLayer = layers.Activation('relu')
 		
@@ -53,7 +53,7 @@ class UNET(Model):
 		def __init__(self, filters):
 			super().__init__()
 
-			self.transposeConvBlock = layers.Conv2DTranspose(filters=filters, kernel_size=(5,5), strides=(2,2), padding=(2,2))
+			self.transposeConvBlock = layers.Conv2DTranspose(filters=filters, kernel_size=(5,5), strides=(2,2), padding="same")
 			self.batchNormalisation = layers.BatchNormalization()
 			self.reluLayer = layers.Activation('relu')
 			self.dropoutLayer = layers.Dropout(0.4)
