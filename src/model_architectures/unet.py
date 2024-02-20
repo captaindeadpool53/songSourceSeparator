@@ -93,11 +93,12 @@ class UNET(Model):
 		self.decoderBlock8  = UNET.DecoderBlock(32)
 
 		self.finalConvLayer = layers.Conv2D(filters=self.outputLayers, kernel_size=(1,1), padding="same", activation="relu") 
-
-
-
+		
+		self.croppingValues: tuple
 
 	def call(self, input: tf.Tensor)-> tf.Tensor:
+		input = self._padInputForDivisibility(input)
+  
 		blockOutput, skipConnectionInput1 = self.encoderBlock1(input)
 		blockOutput, skipConnectionInput2 = self.encoderBlock2(blockOutput)
 		blockOutput, skipConnectionInput3 = self.encoderBlock3(blockOutput)
@@ -113,4 +114,43 @@ class UNET(Model):
 
 		blockOutput = self.finalConvLayer(blockOutput)
 
+		blockOutput = layers.Cropping2D(self.croppingValues)(blockOutput)
+
 		return blockOutput
+
+
+	'''
+	The shapes of the unet input should be divisible by 2^n where n is the number of poolings.
+	This function pads the input to be divisible by 16 (as we have 4 pooling layers).
+ 
+	These padded amounts will be stored and later used to crop the final output according the initial padding values.
+	'''
+	def _padInputForDivisibility(self, input: tf.Tensor):
+			
+		input, heightwisePadding = self._padSymmetrically(input, input[1], "height")	
+		input, widthwisePadding = self._padSymmetrically(input, input[2], "width")			
+			
+		self.croppingValues = (heightwisePadding, widthwisePadding)
+		return input
+
+
+	def _padSymmetrically(self, input:tf.Tensor, dimensionShape, paddingOrientation):
+		paddingAhead, paddingBehind, totalPadding = 0, 0, 0
+  
+		if dimensionShape % 16 != 0:
+				totalPadding = 16 - dimensionShape % 16
+    
+				if totalPadding == 1:
+					paddingBehind = totalPadding
+				else:
+					paddingBehind = totalPadding // 2
+					paddingAhead = totalPadding - paddingBehind
+     
+				if paddingOrientation == "horizontal":
+					padding = ((0, 0), (paddingBehind, paddingAhead))
+				elif paddingOrientation == "vertical":
+					padding = ((paddingBehind, paddingAhead), (0, 0))
+     
+				input = layers.ZeroPadding2D(padding)(input)
+     
+		return input, (paddingBehind, paddingAhead)
