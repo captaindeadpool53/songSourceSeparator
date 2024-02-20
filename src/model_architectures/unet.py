@@ -106,10 +106,10 @@ class UNET(Model):
 		blockOutput = self.convBlock5(blockOutput)
 		blockOutput = self.convBlock6(blockOutput)
 
-		blockOutput = self.decoderBlock5(blockOutput, skipConnectionInput1)
-		blockOutput = self.decoderBlock6(blockOutput, skipConnectionInput2)
-		blockOutput = self.decoderBlock7(blockOutput, skipConnectionInput3)
-		blockOutput = self.decoderBlock8(blockOutput, skipConnectionInput4)
+		blockOutput = self.decoderBlock5(blockOutput, skipConnectionInput4)
+		blockOutput = self.decoderBlock6(blockOutput, skipConnectionInput3)
+		blockOutput = self.decoderBlock7(blockOutput, skipConnectionInput2)
+		blockOutput = self.decoderBlock8(blockOutput, skipConnectionInput1)
 
 		blockOutput = self.finalConvLayer(blockOutput)
 
