@@ -146,9 +146,9 @@ class UNET(Model):
 					paddingBehind = totalPadding // 2
 					paddingAhead = totalPadding - paddingBehind
      
-				if paddingOrientation == "horizontal":
+				if paddingOrientation == "width":
 					padding = ((0, 0), (paddingBehind, paddingAhead))
-				elif paddingOrientation == "vertical":
+				elif paddingOrientation == "height":
 					padding = ((paddingBehind, paddingAhead), (0, 0))
      
 				input = layers.ZeroPadding2D(padding)(input)
