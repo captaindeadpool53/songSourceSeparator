@@ -29,7 +29,8 @@ class DatasetHandler:
 		self.samplesPerSegment = self.segmentLength * self.sampleRate
 		self.framesInSegment = 1 + (self.samplesPerSegment - self.frameSize)//self.hopLength
 		self.frequencyBins = 1 + self.frameSize//2
-		self.spectrogramShape = [self.totalTrainingExamples, self.framesInSegment, self.frequencyBins, 1]
+		self.spectrogramShape = [self.frequencyBins, self.framesInSegment]
+		self.inputShape = [self.totalTrainingExamples] + self.spectrogramShape + [1]  #
 		self.outputShape = []
 		self.numberOfOutputChannels = None
 
@@ -169,7 +170,7 @@ class DatasetHandler:
 
 		self._updateShapeData()
 		outputSignature = (
-			tf.TensorSpec(shape=self.spectrogramShape, dtype=tf.float32),
+			tf.TensorSpec(shape=self.inputShape, dtype=tf.float32),
 			tf.TensorSpec(shape=self.outputShape, dtype=tf.float32)
 		)
 		self.spectrogramDataset = tf.data.Dataset.from_generator(
@@ -178,10 +179,10 @@ class DatasetHandler:
 		)
 
 	def _updateShapeData(self):
-		self.spectrogramShape[0] = self.totalTrainingExamples
+		self.inputShape[0] = self.totalTrainingExamples
 
 		self.numberOfOutputChannels = len(list(self.spectrogramData.values())[0])-1
-		self.outputShape = self.spectrogramShape[:-1] + [self.numberOfOutputChannels]
+		self.outputShape = self.inputShape[:-1] + [self.numberOfOutputChannels]
 
 
 	def datasetGenerator(self):
@@ -233,7 +234,8 @@ class DatasetHandler:
 		return self.trainingDataset, self.testingDataset
 	
 	def getShapeData(self):
-		return self.spectrogramShape, self.numberOfOutputChannels
+		self._updateShapeData()
+		return self.inputShape, self.numberOfOutputChannels
 
 	
 	"""
