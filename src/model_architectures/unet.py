@@ -22,7 +22,7 @@ class UNET(Model):
 		def __init__(self, filters):
 			super().__init__()
 
-			self.transposeConvBlock = layers.Conv2DTranspose(filters=filters, kernel_size=(3,3), strides=(2,2), padding="same")
+			self.transposeConvBlock = layers.Conv2DTranspose(filters=filters, kernel_size=(3,3), strides=(1,1), padding="same")
 			self.batchNormalisation = layers.BatchNormalization()
 			self.reluLayer = layers.Activation('relu')
 
