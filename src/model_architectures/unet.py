@@ -84,8 +84,8 @@ class UNET(Model):
 		self.encoderBlock3  = UNET.EncoderBlock(128)
 		self.encoderBlock4  = UNET.EncoderBlock(256)
 
-		self.convBlock5  = UNET.ConvolutionalBlock(32)
-		self.convBlock6  = UNET.ConvolutionalBlock(32)
+		self.convBlock5  = UNET.ConvolutionalBlock(512)
+		self.convBlock6  = UNET.ConvolutionalBlock(512)
 
 		self.decoderBlock5  = UNET.DecoderBlock(256)
 		self.decoderBlock6  = UNET.DecoderBlock(128)
