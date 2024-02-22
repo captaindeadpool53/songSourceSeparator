@@ -14,14 +14,17 @@ def main():
     # MONO = True
 
     DATA_ROOT_PATH = 'data/babyslakh_16k'
+    
+    # -----------------------------------------PRE-PREOCESSING-----------------------------------------
 
     datasetHandler = DatasetHandler(DATA_ROOT_PATH, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH)
-    datasetHandler.loadAndPreprocessData()
-
-    trainingDataset, testDataset = datasetHandler.getDatasets()
+    trainingDataset, testDataset = datasetHandler.loadAndPreprocessData(type = Constants.TRAINING_DATA)
 
     inputShape, numberOfOutputChannels = datasetHandler.getShapeData()
+    
+    # -----------------------------------------TRAINING-----------------------------------------
 
+    unetModel = None
     if os.path.exists(Constants.CHECKPOINT_PATH.value): 
         unetModel = tf.keras.models.load_model(Constants.CHECKPOINT_PATH.value)
     else:
@@ -50,7 +53,20 @@ def main():
             epochs=40,
             verbose=1
         )
-
+        
+    unetModel.save(Constants.CHECKPOINT_PATH.value)
+    
+    # -----------------------------------------PREDICTING-----------------------------------------
+    
+    if os.path.exists(Constants.SONG_TO_SEPERATE_PATH.value):
+        datasetHandler = DatasetHandler(DATA_ROOT_PATH, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH)
+        datasetHandler.setShapes(inputShape, numberOfOutputChannels)
+        predictionDataset = datasetHandler.loadAndPreprocessData(type = Constants.PREDICTION_DATA)
+        
+        unetModel = tf.keras.models.load_model(Constants.CHECKPOINT_PATH.value)
+        predictedSpectrograms = unetModel.predict(predictionDataset)
+        
+        datasetHandler.postProcessAndSavePrediction(predictedSpectrograms)
 
 if __name__=="__main__":
 	main()
