@@ -6,6 +6,8 @@ class Constants(Enum):
 	LOG_SPECTROGRAMS_SAVE_PATH = 'data/spectrograms'
 	DICTIONAY_SAVE_PATH = 'data/dictionaries/'
 	CHECKPOINT_PATH = 'saved_models/modelCheckpoint.keras'
+	SONG_TO_SEPERATE_PATH = 'data/song_to_seperate/seperateMyTracks.wav'
+	PREDICTION_RESULT_PATH = 'results'
 	
 
 	#File names
@@ -16,6 +18,7 @@ class Constants(Enum):
 	#Dataset types
 	TRAINING_DATA = 'training'
 	TEST_DATA = 'test'
+	PREDICTION_DATA = 'prediction'
 
 	BATCH_SIZE = 32
 

@@ -1,5 +1,5 @@
+from email.policy import default
 import os
-from xmlrpc.client import Boolean
 import librosa
 from matplotlib import pyplot as plt
 import numpy as np
@@ -8,6 +8,7 @@ from src.data_preprocessing.audioLoader import AudioLoader
 from src.data_preprocessing.spectrogramHandler import Spectrogram
 from src.utils.dictionaryUtil import DictionaryUtil
 import tensorflow as tf
+import soundfile as sf
 
 from src.utils.directoryHandler import DirectoryHandler
 
@@ -25,6 +26,7 @@ class DatasetHandler:
 		self.spectrogramDataset: tf.data.Dataset = None
 		self.trainingDataset: tf.data.Dataset = None
 		self.testingDataset: tf.data.Dataset	= None
+		self.predictionDataset: tf.data.Dataset = None
 
 		self.samplesPerSegment = self.segmentLength * self.sampleRate
 		self.framesInSegment = 1 + (self.samplesPerSegment - self.frameSize)//self.hopLength
@@ -33,7 +35,10 @@ class DatasetHandler:
 		self.inputShape = [self.totalTrainingExamples] + self.spectrogramShape + [1]  #
 		self.outputShape = []
 		self.numberOfOutputChannels = None
-
+  
+		self.predictedSpectrogram = None
+		self.audioSegmentsToPredict: np.array 
+		self.spectrogramsToPredict
 		
 
 	"""
@@ -70,6 +75,19 @@ class DatasetHandler:
 
 			else:
 				break
+	
+ 
+	"""
+	When loading predictionData, we will use a simple numpy array instead of dictionary, because we don't need multiple tracks for the mix track.
+ 	"""
+	def loadPredictionData(self):
+		mixTrack = AudioLoader.loadAudioFile( self.rootPath , self.sampleRate)
+					
+		mixTrack = mixTrack[np.newaxis, ...]
+		segments = self._segmentAudioFiles(mixTrack)
+
+		self.audioSegmentsToPredict = np.squeeze(segments) # shape = (numberOfPossibleSegments, samplesPerSegment)
+		self.totalTrainingExamples = self.audioSegmentsToPredict[0]	
 
 
 	"""
@@ -131,6 +149,15 @@ class DatasetHandler:
 				spectrogramData[trackType] = trackSpectrogram
 
 			self.spectrogramData[trackName] = spectrogramData
+   
+
+	def convertToSpectrogramPredictionData(self):
+		self.spectrogramsToPredict = []
+  
+		for track in self.audioSegmentsToPredict:
+			trackSpectrogram = Spectrogram.extractLogSpectrogram(track, self.frameSize, self.hopLength)
+			self.spectrogramsToPredict.append(trackSpectrogram)
+
 
 	def _isSavedSpectrogramDataAvailable(self):
 		filePath = DirectoryHandler.joinPath(Constants.DICTIONAY_SAVE_PATH.value, 'spectrogramData.npy')
@@ -146,6 +173,7 @@ class DatasetHandler:
 			return True
 		return False
 
+
 	def saveDataAsDictionary(self):
 		dictionaryUtil = DictionaryUtil(self.audioData, Constants.DICTIONAY_SAVE_PATH.value, 'audioData.npy')
 		dictionaryUtil.saveAsNpy()
@@ -160,29 +188,37 @@ class DatasetHandler:
 		dictionaryUtil = DictionaryUtil(None, Constants.DICTIONAY_SAVE_PATH.value, 'spectrogramData.npy')
 		self.spectrogramData = dictionaryUtil.loadFromNpy()
 
+
 	def _loadSavedAudioData(self):
 		dictionaryUtil = DictionaryUtil(None, Constants.DICTIONAY_SAVE_PATH.value, 'spectrogramData.npy')
 		self.spectrogramData = dictionaryUtil.loadFromNpy()
 	
+ 
 	def convertToDataset(self):
 		if not self.spectrogramData:
 			self._loadSavedSpectrogramData()
 
 		self._updateShapeData()
 		outputSignature = (
-			tf.TensorSpec(shape=self.inputShape, dtype=tf.float32),
-			tf.TensorSpec(shape=self.outputShape, dtype=tf.float32)
+			tf.TensorSpec(shape=self.inputShape, dtype=tf.float64),
+			tf.TensorSpec(shape=self.outputShape, dtype=tf.float64)
 		)
 		self.spectrogramDataset = tf.data.Dataset.from_generator(
 			self.datasetGenerator,
 			output_signature = outputSignature    
 		)
-
-	def _updateShapeData(self):
-		self.inputShape[0] = self.totalTrainingExamples
-
-		self.numberOfOutputChannels = len(list(self.spectrogramData.values())[0])-1
-		self.outputShape = self.inputShape[:-1] + [self.numberOfOutputChannels]
+  
+  
+	def convertToPredictionDataset(self):
+		self._updateShapeData()
+		outputSignature = (
+			tf.TensorSpec(shape=self.inputShape, dtype=tf.float64)
+		)
+		self.predictionDataset = tf.data.Dataset.from_generator(
+			self.predictionDatasetGenerator,
+			output_signature = outputSignature    
+		)
+		self.predictionDataset = self.predictionDataset.batch(batch_size=Constants.BATCH_SIZE.value)
 
 
 	def datasetGenerator(self):
@@ -211,20 +247,41 @@ class DatasetHandler:
 		X = np.concatenate(X, axis=0)
 		Y = np.concatenate(Y, axis=0)
 		yield (X, Y)
+  
+  
+	def predictionDatasetGenerator(self):
+		X= []
+		for spectrogram in self.spectrogramsToPredict:
+			x = np.array(spectrogram)
+			
+			if len(x.shape) == 2:
+				x = x[..., np.newaxis]
+    
+			if len(x.shape) == 3:
+				x = x[np.newaxis, ...]
+    
+			X.append(x)
+
+		X = np.concatenate(X, axis=0)
+		yield (X)
 			
 
 	def splitDataset(self):
-		self.spectrogramDataset.shuffle(buffer_size= self.totalTrainingExamples ).batch(batch_size=Constants.BATCH_SIZE.value)
+		self.spectrogramDataset = self.spectrogramDataset.shuffle(buffer_size= self.totalTrainingExamples ).batch(batch_size=Constants.BATCH_SIZE.value)
 		self.trainingDataset = self.spectrogramDataset.take(int( 0.8*self.totalTrainingExamples))
 		self.testingDataset = self.spectrogramDataset.skip(int( 0.8*self.totalTrainingExamples))
+
 
 	def cacheDataset(self, dataSetType: Constants):
 		if dataSetType == Constants.TRAINING_DATA:
 			self.trainingDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
-
+   
 		elif dataSetType == Constants.TEST_DATA:
 			self.testingDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
-		
+   
+		elif dataSetType == Constants.PREDICTION_DATA:
+			self.predictionDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
+   
 		else:
 			self.trainingDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
 			self.testingDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
@@ -232,21 +289,40 @@ class DatasetHandler:
 	
 	def getDatasets(self):
 		return self.trainingDataset, self.testingDataset
-	
+
+
+	def getPredictionDataset(self):
+		return self.predictionDataset
+
+ 
 	def getShapeData(self):
 		self._updateShapeData()
 		return self.inputShape, self.numberOfOutputChannels
+
+
+	def _updateShapeData(self):
+		self.inputShape[0] = self.totalTrainingExamples
+		
+		if self.spectrogramData: 
+			self.numberOfOutputChannels = len(list(self.spectrogramData.values())[0])-1
+
+		self.outputShape = self.inputShape[:-1] + [self.numberOfOutputChannels]
+
+
+	def setShapes(self, inputShape, numberOfOutputChannels):
+		self.inputShape = [0] + inputShape[1:]		#Setting batch size to 0 since it will be updated after loading data
+		self.numberOfOutputChannels = numberOfOutputChannels
 
 	
 	"""
  	Loading data from scratch only if it is passed as an argument isForceStart or if pre-saved files are not found.
 	If saved data is found, it loads the saved data and skips on preprocessing and saving it.
   	"""
-	def loadAndPreprocessData(self, isForceStart: bool = False):
+	def loadAndPreprocessData(self, isForceStart: bool = False, type: Constants = Constants.TRAINING_DATA):
 		areSavedAudioUsed = False
 		areSavedSprectrogramsUsed = False
 	
-		if not isForceStart:
+		if not isForceStart and type == Constants.TRAINING_DATA:
 			if self._isSavedAudioDataAvailable():
 				self._loadSavedAudioData()
 				areSavedAudioUsed = True
@@ -254,21 +330,41 @@ class DatasetHandler:
 			if self._isSavedSpectrogramDataAvailable():
 				self._loadSavedSpectrogramData
 				areSavedSprectrogramsUsed = True
-    
+		
 		if isForceStart or not self.audioData:
 			self.loadAudioData()
 		if isForceStart or not self.spectrogramData:
 			self.convertToSpectrogramData()
-		if isForceStart or not areSavedAudioUsed:
+		if (isForceStart or not areSavedAudioUsed) and type == Constants.TRAINING_DATA:
 			self.saveDataAsDictionary()
-		if isForceStart or not areSavedSprectrogramsUsed:
+		if (isForceStart or not areSavedSprectrogramsUsed) and type == Constants.TRAINING_DATA:
 			self.saveSpectrograms()
 
 		self.convertToDataset()
-		self.splitDataset()
   
+		if type == Constants.TRAINING_DATA:
+			self.splitDataset()
+			self.cacheDataset()
+			return self.getDatasets()
+		else: 
+			self.cacheDataset(type)
+			return self.getPredictionDataset()
   
-	def visualise_spectrogram_for_whole_song(self, spectrogram: np.array):
+
+	def postProcessAndSavePrediction(self, predictedSpectrograms):
+
+		self.predictedSpectrogram = np.concatenate(predictedSpectrograms, axis=1)
+		complexPhases = Spectrogram.extractLogSpectrogramPhase(self.audioSegmentsToPredict, self.frameSize, self.hopLength)
+		
+		self.predictedSpectrogram = self.predictedSpectrogram[:, :complexPhases.shape[1]]  #removes the added padding during segmentation of data
+		complexValuedSpectrogram = np.multiply(complexPhases, self.predictedSpectrogram)
+		finalPrediction = librosa.istft(complexValuedSpectrogram, hop_length=self.hopLength, n_fft = self.frameSize) #istft to move the audio from time-frequency domain to time-domain
+		
+		sf.write(Constants.PREDICTION_RESULT_PATH.value, finalPrediction, self.sampleRate)
+
+
+  
+	def visualiseSpectrogram(self, spectrogram: np.array):
 		plt.figure(figsize=(15, 10))
 		try:
 			librosa.display.specshow( spectrogram, x_axis="time", y_axis="log", sr=self.sampleRate, hop_length=self.hopLength)
