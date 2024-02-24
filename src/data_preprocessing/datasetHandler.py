@@ -272,7 +272,7 @@ class DatasetHandler:
 		self.testingDataset = self.spectrogramDataset.skip(int( 0.8*self.totalTrainingExamples))
 
 
-	def cacheDataset(self, dataSetType: Constants):
+	def cacheDataset(self, dataSetType: Constants = Constants.ALL_DATA):
 		if dataSetType == Constants.TRAINING_DATA:
 			self.trainingDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
    

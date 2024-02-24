@@ -19,6 +19,7 @@ class Constants(Enum):
 	TRAINING_DATA = 'training'
 	TEST_DATA = 'test'
 	PREDICTION_DATA = 'prediction'
+	ALL_DATA = "all"
 
 	BATCH_SIZE = 32
 
