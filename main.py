@@ -59,14 +59,14 @@ def main():
     # -----------------------------------------PREDICTING-----------------------------------------
     
     if os.path.exists(Constants.SONG_TO_SEPERATE_PATH.value):
-        datasetHandler = DatasetHandler(DATA_ROOT_PATH, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH)
-        datasetHandler.setShapes(inputShape, numberOfOutputChannels)
-        predictionDataset = datasetHandler.loadAndPreprocessData(type = Constants.PREDICTION_DATA)
+        predictionDatasetHandler = DatasetHandler(DATA_ROOT_PATH, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH)
+        predictionDatasetHandler.setShapes(inputShape, numberOfOutputChannels)
+        predictionDataset = predictionDatasetHandler.loadAndPreprocessData(type = Constants.PREDICTION_DATA)
         
         unetModel = tf.keras.models.load_model(Constants.CHECKPOINT_PATH.value)
         predictedSpectrograms = unetModel.predict(predictionDataset)
         
-        datasetHandler.postProcessAndSavePrediction(predictedSpectrograms)
+        predictionDatasetHandler.postProcessAndSavePrediction(predictedSpectrograms)
 
 if __name__=="__main__":
 	main()
