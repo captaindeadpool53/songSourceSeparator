@@ -341,13 +341,15 @@ class DatasetHandler:
 		if (isForceStart or not areSavedSprectrogramsUsed) and type == Constants.TRAINING_DATA:
 			self.saveSpectrograms()
 
-		self.convertToDataset()
+		
   
 		if type == Constants.TRAINING_DATA:
+			self.convertToDataset()
 			self.splitDataset()
 			self.cacheDataset()
 			return self.getDatasets()
 		else: 
+			self.convertToPredictionDataset()
 			self.cacheDataset(type)
 			return self.getPredictionDataset()
   
