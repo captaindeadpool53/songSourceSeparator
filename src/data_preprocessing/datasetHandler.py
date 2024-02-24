@@ -326,6 +326,7 @@ class DatasetHandler:
 			if self._isSavedAudioDataAvailable():
 				self._loadSavedAudioData()
 				areSavedAudioUsed = True
+				self.totalTrainingExamples = len(self.audioData)
     
 			if self._isSavedSpectrogramDataAvailable():
 				self._loadSavedSpectrogramData
