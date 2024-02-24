@@ -36,9 +36,9 @@ class DatasetHandler:
 		self.outputShape = []
 		self.numberOfOutputChannels = None
   
-		self.predictedSpectrogram = None
+		self.predictedSpectrogram: np.array = None
 		self.audioSegmentsToPredict: np.array = None
-		self.spectrogramsToPredict = None
+		self.spectrogramsToPredict: list = None
 		
 
 	"""
