@@ -37,8 +37,8 @@ class DatasetHandler:
 		self.numberOfOutputChannels = None
   
 		self.predictedSpectrogram = None
-		self.audioSegmentsToPredict: np.array 
-		self.spectrogramsToPredict
+		self.audioSegmentsToPredict: np.array = None
+		self.spectrogramsToPredict = None
 		
 
 	"""
