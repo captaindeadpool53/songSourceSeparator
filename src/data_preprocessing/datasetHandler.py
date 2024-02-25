@@ -32,7 +32,7 @@ class DatasetHandler:
 		self.framesInSegment = 1 + (self.samplesPerSegment - self.frameSize)//self.hopLength
 		self.frequencyBins = 1 + self.frameSize//2
 		self.spectrogramShape = [self.frequencyBins, self.framesInSegment]
-		self.inputShape = [self.totalTrainingExamples] + self.spectrogramShape + [1]  #
+		self.inputShape = self.spectrogramShape + [1]  
 		self.outputShape = []
 		self.numberOfOutputChannels = None
   
@@ -259,14 +259,11 @@ class DatasetHandler:
 			if len(x.shape) == 3:
 				x = x[np.newaxis, ...]
     
-			X.append(x)
-
-		X = np.concatenate(X, axis=0)
-		yield (X)
+			yield (x)
 			
 
 	def splitDataset(self):
-		self.spectrogramDataset = self.spectrogramDataset.shuffle(buffer_size= self.totalTrainingExamples ).batch(batch_size=Constants.BATCH_SIZE.value)
+		self.spectrogramDataset = self.spectrogramDataset.shuffle(buffer_size= self.totalTrainingExamples).batch(batch_size=Constants.BATCH_SIZE.value)
 		self.trainingDataset = self.spectrogramDataset.take(int( 0.8*self.totalTrainingExamples))
 		self.testingDataset = self.spectrogramDataset.skip(int( 0.8*self.totalTrainingExamples))
 
@@ -300,8 +297,6 @@ class DatasetHandler:
 
 
 	def _updateShapeData(self):
-		self.inputShape[0] = self.totalTrainingExamples
-		
 		if self.spectrogramData: 
 			self.numberOfOutputChannels = len(list(self.spectrogramData.values())[0])-1
 
@@ -309,7 +304,7 @@ class DatasetHandler:
 
 
 	def setShapes(self, inputShape, numberOfOutputChannels):
-		self.inputShape = [0] + inputShape[1:]		#Setting batch size to 0 since it will be updated after loading data
+		self.inputShape = inputShape[0:]		
 		self.numberOfOutputChannels = numberOfOutputChannels
 
 	
