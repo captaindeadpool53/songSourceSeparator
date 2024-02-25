@@ -25,12 +25,12 @@ class PipelineHandler:
 		self.trainingDataset, self.testDataset = self.datasetHandler.loadAndPreprocessData(type = Constants.TRAINING_DATA)
 
 
-	def trainModel(self):
+	def trainModel(self, weightDecay=1e-6, learningRate = 1e-3):
 		if os.path.exists(Constants.CHECKPOINT_PATH.value): 
 			self.unetModel = tf.keras.models.load_model(Constants.CHECKPOINT_PATH.value)
 		else:
 			self.unetModel = UNET(self.config.INPUT_SHAPE, self.config.NUMBER_OF_OUTPUT_CHANNELS)
-			optimizer = tf.keras.optimizers.AdamW(weight_decay=1e-6, learning_rate=1e-3)
+			optimizer = tf.keras.optimizers.AdamW(weight_decay=weightDecay, learning_rate=learningRate)
 
 			self.unetModel.compile(loss = EvaluationHandler.drumsLossFunction, optimizer = optimizer, metrics=["mse"])
 			
