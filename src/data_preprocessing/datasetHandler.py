@@ -335,7 +335,7 @@ class DatasetHandler:
 		
 		self.predictedSpectrogram = self.predictedSpectrogram[:, :complexPhases.shape[1]]  #removes the added padding during segmentation of data
 		complexValuedSpectrogram = np.multiply(complexPhases, self.predictedSpectrogram)
-		finalPrediction = librosa.istft(complexValuedSpectrogram, hop_length=self.config.HOP_LEGTH, n_fft = self.config.FRAME_SIZE) #istft to move the audio from time-frequency domain to time-domain
+		finalPrediction = librosa.istft(complexValuedSpectrogram, hop_length=self.config.HOP_LENGTH, n_fft = self.config.FRAME_SIZE) #istft to move the audio from time-frequency domain to time-domain
 		
 		sf.write(Constants.PREDICTION_RESULT_PATH.value, finalPrediction, self.config.SAMPLE_RATE)
 
@@ -344,7 +344,7 @@ class DatasetHandler:
 	def visualiseSpectrogram(self, spectrogram: np.array):
 		plt.figure(figsize=(15, 10))
 		try:
-			librosa.display.specshow( spectrogram, x_axis="time", y_axis="log", sr=self.config.SAMPLE_RATE, hop_length=self.config.HOP_LEGTH)
+			librosa.display.specshow( spectrogram, x_axis="time", y_axis="log", sr=self.config.SAMPLE_RATE, hop_length=self.config.HOP_LENGTH)
 		except TypeError as e:
 			raise TypeError(e.message)
 
