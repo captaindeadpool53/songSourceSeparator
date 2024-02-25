@@ -6,72 +6,28 @@ from config.constants import Constants
 import tensorflow as tf 
 import argparse
 
+from src.pipeline import PipelineHandler
+
 
 def main(datasetPath):
-    FRAME_SIZE =2048   #512
-    HOP_LENGTH = 512   #256
-    SEGMENT_LENGTH_IN_SECONDS = 2  
-    SAMPLE_RATE = 16000
-    # MONO = True
-    
     DATA_ROOT_PATH = datasetPath if datasetPath else 'data/babyslakh_16k'
+
+    pipelineHandler = PipelineHandler(
+        TRAINING_DATA_ROOT=DATA_ROOT_PATH,
+        FRAME_SIZE=2048,
+        HOP_LENGTH=512,
+        SEGMENT_LENGTH_IN_SECONDS=2,
+        SAMPLE_RATE=16000,
+    )
     
-    # -----------------------------------------PRE-PREOCESSING-----------------------------------------
-
-    datasetHandler = DatasetHandler(DATA_ROOT_PATH, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH)
-    trainingDataset, testDataset = datasetHandler.loadAndPreprocessData(type = Constants.TRAINING_DATA)
-
-    inputShape, numberOfOutputChannels = datasetHandler.getShapeData()
+    pipelineHandler.preprocess()
+    pipelineHandler.trainModel()
+    pipelineHandler.predict()
     
-    # -----------------------------------------TRAINING-----------------------------------------
 
-    unetModel = None
-    if os.path.exists(Constants.CHECKPOINT_PATH.value): 
-        unetModel = tf.keras.models.load_model(Constants.CHECKPOINT_PATH.value)
-    else:
-        unetModel = UNET(inputShape, numberOfOutputChannels)
-        optimizer = tf.keras.optimizers.AdamW(weight_decay=1e-6, learning_rate=1e-3)
-
-        unetModel.compile(loss = EvaluationHandler.drumsLossFunction, optimizer = optimizer)
-        
-        learningRateSchedulerCallback = tf.keras.callbacks.LearningRateScheduler(EvaluationHandler.learningRateScheduler)
-        
-        checkpointCallback = tf.keras.callbacks.ModelCheckpoint(
-            filepath=Constants.CHECKPOINT_PATH.value,
-            save_weights_only=False,
-            save_best_only=True,
-            monitor="val_loss",
-            verbose=1,
-        )
-
-        callbacks = [checkpointCallback, learningRateSchedulerCallback]
-
-        unetModel.fit(
-            trainingDataset,
-            validation_data = testDataset,
-            callbacks=callbacks,
-            batch_size=Constants.BATCH_SIZE.value,
-            epochs=40,
-            verbose=1
-        )
-        
-    unetModel.save(Constants.CHECKPOINT_PATH.value)
-    
-    # -----------------------------------------PREDICTING-----------------------------------------
-    
-    if os.path.exists(Constants.SONG_TO_SEPERATE_PATH.value):
-        predictionDatasetHandler = DatasetHandler(DATA_ROOT_PATH, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH)
-        predictionDatasetHandler.setShapes(inputShape, numberOfOutputChannels)
-        predictionDataset = predictionDatasetHandler.loadAndPreprocessData(type = Constants.PREDICTION_DATA)
-        
-        unetModel = tf.keras.models.load_model(Constants.CHECKPOINT_PATH.value)
-        predictedSpectrograms = unetModel.predict(predictionDataset)
-        
-        predictionDatasetHandler.postProcessAndSavePrediction(predictedSpectrograms)
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="Train the model on the data present at path.")
     parser.add_argument("datasetPath", type=str, help="Path of the dataset relative to the project")
     args = parser.parse_args()
     main(args.datasetPath)
-
