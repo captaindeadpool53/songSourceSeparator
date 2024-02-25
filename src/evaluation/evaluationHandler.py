@@ -17,7 +17,7 @@ class EvaluationHandler:
         accompanimentTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 1] -target[...,1]))
 
         totalLoss = alpha * drumsTrackLoss + (1 - alpha) * accompanimentTrackLoss
-        print("Loss for iteration = "+totalLoss)
+        print("Loss for iteration = "+str(totalLoss))
         return totalLoss
     
     @staticmethod
