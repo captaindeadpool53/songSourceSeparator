@@ -221,6 +221,11 @@ class DatasetHandler:
 		self.predictionDataset = self.predictionDataset.batch(batch_size=Constants.BATCH_SIZE.value)
 
 
+	"""
+	Outputs one training example at a time with shape: 
+ 	x = [number of frequency bins, number of frames per segment, 1]
+	y = [number of frequency bins, number of frames per segment, 2]
+	"""
 	def datasetGenerator(self):
 		X= []
 		Y= []
@@ -240,14 +245,8 @@ class DatasetHandler:
 			if len(y.shape) == 3:
 				y = y[np.newaxis, ...]
 			
-			
-			X.append(x)
-			Y.append(y)
+			yield(x, y)
 
-		X = np.concatenate(X, axis=0)
-		Y = np.concatenate(Y, axis=0)
-		yield (X, Y)
-  
   
 	def predictionDatasetGenerator(self):
 		X= []
