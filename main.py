@@ -4,16 +4,17 @@ from src.evaluation.evaluationHandler import EvaluationHandler
 from src.model_architectures.unet import UNET
 from config.constants import Constants
 import tensorflow as tf 
+import argparse
 
 
-def main():
+def main(datasetPath):
     FRAME_SIZE =2048   #512
     HOP_LENGTH = 512   #256
     SEGMENT_LENGTH_IN_SECONDS = 2  
     SAMPLE_RATE = 16000
     # MONO = True
-
-    DATA_ROOT_PATH = 'data/babyslakh_16k'
+    
+    DATA_ROOT_PATH = datasetPath if datasetPath else 'data/babyslakh_16k'
     
     # -----------------------------------------PRE-PREOCESSING-----------------------------------------
 
@@ -69,5 +70,8 @@ def main():
         predictionDatasetHandler.postProcessAndSavePrediction(predictedSpectrograms)
 
 if __name__=="__main__":
-	main()
+    parser = argparse.ArgumentParser(description="Train the model on the data present at path.")
+    parser.add_argument("datasetPath", type=str, help="Path of the dataset relative to the project")
+    args = parser.parse_args()
+    main(args.datasetPath)
 
