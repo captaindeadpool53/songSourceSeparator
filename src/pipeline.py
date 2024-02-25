@@ -32,7 +32,7 @@ class PipelineHandler:
 			self.unetModel = UNET(self.config.INPUT_SHAPE, self.config.NUMBER_OF_OUTPUT_CHANNELS)
 			optimizer = tf.keras.optimizers.AdamW(weight_decay=1e-6, learning_rate=1e-3)
 
-			self.unetModel.compile(loss = EvaluationHandler.drumsLossFunction, optimizer = optimizer)
+			self.unetModel.compile(loss = EvaluationHandler.drumsLossFunction, optimizer = optimizer, metrics=["val_loss"])
 			
 			learningRateSchedulerCallback = tf.keras.callbacks.LearningRateScheduler(EvaluationHandler.learningRateScheduler)
 			
