@@ -10,7 +10,7 @@ class EvaluationHandler:
 	Loss function when we have two tracks as output - drums and accompaniments
 	"""
     @staticmethod
-    def drumsLossFunction(target: tf.Tensor,prediction: tf.Tensor, alpha: float = 1.0) -> float96:
+    def drumsLossFunction(target: tf.Tensor,prediction: tf.Tensor, alpha: float = 1.0) -> float:
         if alpha > 1 or alpha < 0:
             raise "Alpha cannot be greater than 1 or less than 0"
 
