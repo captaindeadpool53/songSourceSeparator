@@ -1,4 +1,5 @@
 import tensorflow as tf
+from keras.saving import register_keras_serializable
 
 
 class EvaluationHandler:
@@ -9,6 +10,7 @@ class EvaluationHandler:
 	Loss function when we have two tracks as output - drums and accompaniments
 	"""
     @staticmethod
+    @register_keras_serializable
     def drumsLossFunction(target: tf.Tensor,prediction: tf.Tensor, alpha: float = 1.0) -> float:
         drumsTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 0] - target[..., 0]))
         accompanimentTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 1] -target[...,1]))
