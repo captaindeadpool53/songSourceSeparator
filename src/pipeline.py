@@ -62,7 +62,7 @@ class PipelineHandler:
 
         self.unetModel.save(Constants.CHECKPOINT_PATH.value)
 
-    def predict(self, predictionDataPath=None):
+    def predict(self, predictionDataPath=None, modelCheckpointPath = Constants.CHECKPOINT_PATH.value):
         if predictionDataPath:
             self.config.PREDICTION_DATA_ROOT = predictionDataPath
 
@@ -72,7 +72,7 @@ class PipelineHandler:
                 type=Constants.PREDICTION_DATA
             )
 
-            self.unetModel = tf.keras.models.load_model(Constants.CHECKPOINT_PATH.value)
+            self.unetModel = tf.keras.models.load_model(modelCheckpointPath)
             optimizer = tf.keras.optimizers.AdamW(
                 weight_decay=PipelineHandler.defaultWeightDecay,
                 learning_rate=PipelineHandler.defaultLearningRate,
