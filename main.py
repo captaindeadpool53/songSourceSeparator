@@ -18,6 +18,7 @@ def main(datasetPath):
         HOP_LENGTH=512,
         SEGMENT_LENGTH_IN_SECONDS=2,
         SAMPLE_RATE=16000,
+        PREDICTION_DATA_ROOT=Constants.SONG_TO_SEPERATE_PATH.value
     )
     
     pipelineHandler.preprocess()
