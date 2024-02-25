@@ -332,8 +332,9 @@ class DatasetHandler:
 
 		self.predictedSpectrogram = np.concatenate(predictedSpectrograms, axis=1)
 		complexPhases = Spectrogram.extractLogSpectrogramPhase(self.audioSegmentsToPredict, self.config.FRAME_SIZE, self.config.HOP_LENGTH)
+		complexPhases = complexPhases[..., np.newaxis]
 		
-		self.predictedSpectrogram = self.predictedSpectrogram[:, :complexPhases.shape[1]]  #removes the added padding during segmentation of data
+		self.predictedSpectrogram = self.predictedSpectrogram[:, :complexPhases.shape[1], :]  #removes the added padding during segmentation of data
 		complexValuedSpectrogram = np.multiply(complexPhases, self.predictedSpectrogram)
 		finalPrediction = librosa.istft(complexValuedSpectrogram, hop_length=self.config.HOP_LENGTH, n_fft = self.config.FRAME_SIZE) #istft to move the audio from time-frequency domain to time-domain
 		

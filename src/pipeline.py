@@ -72,11 +72,13 @@ class PipelineHandler:
                 type=Constants.PREDICTION_DATA
             )
 
+            print("::: Loading checkpoint model :::")
             self.unetModel = tf.keras.models.load_model(modelCheckpointPath, compile=False)
             optimizer = tf.keras.optimizers.AdamW(
                 weight_decay=PipelineHandler.defaultWeightDecay,
                 learning_rate=PipelineHandler.defaultLearningRate,
             )
+            print("::: Loading successful :::")
             self.unetModel.compile(
                 loss=EvaluationHandler.drumsLossFunction,
                 optimizer=optimizer,
