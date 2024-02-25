@@ -346,7 +346,7 @@ class DatasetHandler:
 			individualComplexValuedSpectrogram = np.squeeze(complexValuedSpectrogram[...,trackTypeIndex])
 			finalPrediction = librosa.istft(individualComplexValuedSpectrogram, hop_length=self.config.HOP_LENGTH, n_fft = self.config.FRAME_SIZE) #istft to move the audio from time-frequency domain to time-domain
    
-			trackPath = DirectoryHandler.joinPath(Constants.PREDICTION_RESULT_PATH.value, "Track" + trackTypeIndex + ".wav")
+			trackPath = DirectoryHandler.joinPath(Constants.PREDICTION_RESULT_PATH.value, "Track" + str(trackTypeIndex) + ".wav")
 			sf.write(trackPath, finalPrediction, self.config.SAMPLE_RATE)
 			
 		
