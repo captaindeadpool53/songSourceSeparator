@@ -10,9 +10,6 @@ class EvaluationHandler:
 	"""
     @staticmethod
     def drumsLossFunction(target: tf.Tensor,prediction: tf.Tensor, alpha: float = 1.0) -> float:
-        if alpha > 1 or alpha < 0:
-            raise "Alpha cannot be greater than 1 or less than 0"
-
         drumsTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 0] - target[..., 0]))
         accompanimentTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 1] -target[...,1]))
 
