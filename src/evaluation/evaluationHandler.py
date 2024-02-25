@@ -1,4 +1,3 @@
-from numpy import float96
 import tensorflow as tf
 
 
