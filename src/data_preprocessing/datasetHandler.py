@@ -134,7 +134,7 @@ class DatasetHandler:
 			spectrogramData = {}
 
 			for trackType, track in trackData.items():
-				trackSpectrogram = Spectrogram.extractLogSpectrogram(track, self.config.FRAME_SIZE, self.config.HOP_LEGTH)
+				trackSpectrogram = Spectrogram.extractLogSpectrogram(track, self.config.FRAME_SIZE, self.config.HOP_LENGTH)
 				spectrogramData[trackType] = trackSpectrogram
 
 			self.spectrogramData[trackName] = spectrogramData
@@ -144,7 +144,7 @@ class DatasetHandler:
 		self.spectrogramsToPredict = []
   
 		for track in self.audioSegmentsToPredict:
-			trackSpectrogram = Spectrogram.extractLogSpectrogram(track, self.config.FRAME_SIZE, self.config.HOP_LEGTH)
+			trackSpectrogram = Spectrogram.extractLogSpectrogram(track, self.config.FRAME_SIZE, self.config.HOP_LENGTH)
 			self.spectrogramsToPredict.append(trackSpectrogram)
 
 
@@ -331,7 +331,7 @@ class DatasetHandler:
 	def postProcessAndSavePrediction(self, predictedSpectrograms):
 
 		self.predictedSpectrogram = np.concatenate(predictedSpectrograms, axis=1)
-		complexPhases = Spectrogram.extractLogSpectrogramPhase(self.audioSegmentsToPredict, self.config.FRAME_SIZE, self.config.HOP_LEGTH)
+		complexPhases = Spectrogram.extractLogSpectrogramPhase(self.audioSegmentsToPredict, self.config.FRAME_SIZE, self.config.HOP_LENGTH)
 		
 		self.predictedSpectrogram = self.predictedSpectrogram[:, :complexPhases.shape[1]]  #removes the added padding during segmentation of data
 		complexValuedSpectrogram = np.multiply(complexPhases, self.predictedSpectrogram)
