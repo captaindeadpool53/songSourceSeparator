@@ -1,3 +1,4 @@
+from numpy import float96
 import tensorflow as tf
 
 
@@ -9,7 +10,7 @@ class EvaluationHandler:
 	Loss function when we have two tracks as output - drums and accompaniments
 	"""
     @staticmethod
-    def drumsLossFunction(prediction: tf.Tensor, target: tf.Tensor, alpha: float = 1.0) -> float:
+    def drumsLossFunction(target: tf.Tensor,prediction: tf.Tensor, alpha: float = 1.0) -> float96:
         if alpha > 1 or alpha < 0:
             raise "Alpha cannot be greater than 1 or less than 0"
 
@@ -17,7 +18,7 @@ class EvaluationHandler:
         accompanimentTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 1] -target[...,1]))
 
         totalLoss = alpha * drumsTrackLoss + (1 - alpha) * accompanimentTrackLoss
-
+        print("Loss for iteration = "+totalLoss)
         return totalLoss
     
     @staticmethod
