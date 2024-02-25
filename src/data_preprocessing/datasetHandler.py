@@ -238,12 +238,6 @@ class DatasetHandler:
 			
 			if len(x.shape) == 2:
 				x = x[..., np.newaxis]
-    
-			if len(x.shape) == 3:
-				x = x[np.newaxis, ...]
-    
-			if len(y.shape) == 3:
-				y = y[np.newaxis, ...]
 			
 			yield(x, y)
 
@@ -255,9 +249,6 @@ class DatasetHandler:
 			
 			if len(x.shape) == 2:
 				x = x[..., np.newaxis]
-    
-			if len(x.shape) == 3:
-				x = x[np.newaxis, ...]
     
 			yield (x)
 			
