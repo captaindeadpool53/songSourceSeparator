@@ -14,3 +14,5 @@ src/model_architectures/__pycache__/unet.cpython-311.pyc
 src/utils/__pycache__/dictionaryUtil.cpython-311.pyc
 src/utils/__pycache__/directoryHandler.cpython-311.pyc
 SongSourceSeperator.code-workspace
+saved_models/modelCheckpoint.keras
+
