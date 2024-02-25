@@ -65,8 +65,10 @@ class PipelineHandler:
     def predict(self, predictionDataPath=None, modelCheckpointPath = Constants.CHECKPOINT_PATH.value):
         if predictionDataPath:
             self.config.PREDICTION_DATA_ROOT = predictionDataPath
-
+            
         if os.path.exists(Constants.SONG_TO_SEPERATE_PATH.value):
+            
+            print("::: Preprocessing prediction data :::")
             self.predictionDatasetHandler = DatasetHandler(self.config)
             predictionDataset = self.predictionDatasetHandler.loadAndPreprocessData(
                 type=Constants.PREDICTION_DATA
@@ -79,6 +81,8 @@ class PipelineHandler:
                 learning_rate=PipelineHandler.defaultLearningRate,
             )
             print("::: Loading successful :::")
+            
+            print("::: Compiling and Predicting result :::")
             self.unetModel.compile(
                 loss=EvaluationHandler.drumsLossFunction,
                 optimizer=optimizer,
