@@ -34,8 +34,8 @@ class PipelineHandler:
             self.unetModel = tf.keras.models.load_model(self.modelCheckpointPath)
         else:
             self.unetModel = UNET(self.config.INPUT_SHAPE, self.config.NUMBER_OF_OUTPUT_CHANNELS)
-            optimizer = tf.keras.optimizers.AdamW(weight_decay=weightDecay, learning_rate=learningRate)
-
+            
+        optimizer = tf.keras.optimizers.AdamW(weight_decay=weightDecay, learning_rate=learningRate)
         self.unetModel.compile(
             loss = lambda : EvaluationHandler.drumsLossFunction(alpha=alpha), 
             optimizer = optimizer, 
