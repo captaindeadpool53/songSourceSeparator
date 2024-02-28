@@ -6,8 +6,9 @@ class Constants(Enum):
 	LOG_SPECTROGRAMS_SAVE_PATH = 'data/spectrograms'
 	DICTIONAY_SAVE_PATH = 'data/dictionaries/'
 	CHECKPOINT_PATH = 'saved_models/modelCheckpoint.keras'
-	SONG_TO_SEPERATE_PATH = 'data/song_to_seperate/seperateMyTracks.wav'
+	SONG_TO_SEPERATE_DEFAULT_PATH = 'data/song_to_seperate/seperateMyTracks.wav'
 	PREDICTION_RESULT_PATH = 'results'
+	TRAINING_DATA_DEFAULT_ROOT_PATH = 'data/babyslakh_16k'
 	
 
 	#File names

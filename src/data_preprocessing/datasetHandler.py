@@ -69,7 +69,7 @@ class DatasetHandler:
 	When loading predictionData, we will use a simple numpy array instead of dictionary, because we don't need multiple tracks for the mix track.
  	"""
 	def loadPredictionData(self):
-		mixTrack = AudioLoader.loadAudioFile( self.config.PREDICTION_DATA_ROOT , self.config.SAMPLE_RATE)
+		mixTrack = AudioLoader.loadAudioFile( self.config.SONG_TO_PREDICT_PATH , self.config.SAMPLE_RATE)
 					
 		mixTrack = mixTrack[np.newaxis, ...]
 		segments = self._segmentAudioFiles(mixTrack)
