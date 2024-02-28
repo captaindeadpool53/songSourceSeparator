@@ -10,14 +10,16 @@ class PipelineHandler:
     defaultWeightDecay = 1e-6
     defaultLearningRate = 1e-3
 
-    def __init__(self, TRAINING_DATA_ROOT, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS = 2, PREDICTION_DATA_ROOT = None):
-        self.config: ConfigurationHandler = ConfigurationHandler(TRAINING_DATA_ROOT, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS , PREDICTION_DATA_ROOT)
+    def __init__(self, datasetRootPath, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS = 2, songToPredictPath = None, modelCheckpointPath = Constants.CHECKPOINT_PATH.value):
+        self.config: ConfigurationHandler = ConfigurationHandler(datasetRootPath, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS , songToPredictPath)
         self.datasetHandler: DatasetHandler = None 
         self.unetModel: UNET = None
         self.predictionDatasetHandler: DatasetHandler = None 
 
         self.trainingDataset: tf.data.Dataset = None
         self.testDataset: tf.data.Dataset = None
+        self.modelCheckpointPath: str = modelCheckpointPath
+
 
     def preprocess(self, trainingDataRootPath=None):
         if trainingDataRootPath:
@@ -26,47 +28,53 @@ class PipelineHandler:
         self.datasetHandler = DatasetHandler(self.config)
         self.trainingDataset, self.testDataset = self.datasetHandler.loadAndPreprocessData(type = Constants.TRAINING_DATA)
 
-    def trainModel(self, weightDecay=defaultWeightDecay, learningRate = defaultLearningRate):
-        if os.path.exists(Constants.CHECKPOINT_PATH.value): 
-            self.unetModel = tf.keras.models.load_model(Constants.CHECKPOINT_PATH.value)
+
+    def trainModel(self, weightDecay=defaultWeightDecay, learningRate = defaultLearningRate, alpha = 1.0):
+        if os.path.exists(self.modelCheckpointPath): 
+            self.unetModel = tf.keras.models.load_model(self.modelCheckpointPath)
         else:
             self.unetModel = UNET(self.config.INPUT_SHAPE, self.config.NUMBER_OF_OUTPUT_CHANNELS)
             optimizer = tf.keras.optimizers.AdamW(weight_decay=weightDecay, learning_rate=learningRate)
 
-            self.unetModel.compile(loss = EvaluationHandler.drumsLossFunction, optimizer = optimizer, metrics=["mse"])
+        self.unetModel.compile(
+            loss = lambda : EvaluationHandler.drumsLossFunction(alpha=alpha), 
+            optimizer = optimizer, 
+            metrics=["mse"]  #metrics just for the sake of logging 
+        )
 
-            learningRateSchedulerCallback = tf.keras.callbacks.LearningRateScheduler(EvaluationHandler.learningRateScheduler)
+        learningRateSchedulerCallback = tf.keras.callbacks.LearningRateScheduler(EvaluationHandler.learningRateScheduler)
 
-            checkpointCallback = tf.keras.callbacks.ModelCheckpoint(
-				filepath=Constants.CHECKPOINT_PATH.value,
-				save_weights_only=False,
-				save_best_only=True,
-				monitor="val_loss",
-				verbose=1,
-			)
+        checkpointCallback = tf.keras.callbacks.ModelCheckpoint(
+			filepath=Constants.CHECKPOINT_PATH.value,
+			save_weights_only=False,
+			save_best_only=True,
+			monitor="val_loss",
+			verbose=1,
+		)
 
-            callbacks = [checkpointCallback, learningRateSchedulerCallback]
+        callbacks = [checkpointCallback, learningRateSchedulerCallback]
 
-            self.unetModel.fit(
-				self.trainingDataset,
-				validation_data = self.testDataset,
-				callbacks=callbacks,
-				batch_size=Constants.BATCH_SIZE.value,
-				epochs=40,
-				verbose=1
-			)
+        self.unetModel.fit(
+			self.trainingDataset,
+			validation_data = self.testDataset,
+			callbacks=callbacks,
+			batch_size=Constants.BATCH_SIZE.value,
+			epochs=40,
+			verbose=1
+		)
 
-        savePath = Constants.CHECKPOINT_PATH.value.split('/')[0]
+        savePath = self.modelCheckpointPath.split('/')[0]
         if not os.path.exists(savePath):
             os.makedirs(savePath)
 
-        self.unetModel.save(Constants.CHECKPOINT_PATH.value)
+        self.unetModel.save(self.modelCheckpointPath)
+        
 
-    def predict(self, predictionDataPath=None, modelCheckpointPath = Constants.CHECKPOINT_PATH.value):
+    def predict(self, predictionDataPath=None):
         if predictionDataPath:
-            self.config.PREDICTION_DATA_ROOT = predictionDataPath
+            self.config.SONG_TO_PREDICT_PATH = predictionDataPath
             
-        if os.path.exists(Constants.SONG_TO_SEPERATE_PATH.value):
+        if os.path.exists(self.config.SONG_TO_PREDICT_PATH):
             
             print("::: Preprocessing prediction data :::")
             self.predictionDatasetHandler = DatasetHandler(self.config)
@@ -75,7 +83,7 @@ class PipelineHandler:
             )
 
             print("::: Loading checkpoint model :::")
-            self.unetModel = tf.keras.models.load_model(modelCheckpointPath, compile=False)
+            self.unetModel = tf.keras.models.load_model(self.modelCheckpointPath, compile=False)
             optimizer = tf.keras.optimizers.AdamW(
                 weight_decay=PipelineHandler.defaultWeightDecay,
                 learning_rate=PipelineHandler.defaultLearningRate,
