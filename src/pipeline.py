@@ -45,7 +45,7 @@ class PipelineHandler:
         
         optimizer = tf.keras.optimizers.AdamW(weight_decay=weightDecay, learning_rate=learningRate)
         self.unetModel.compile(
-            loss = lambda : lossFunction, 
+            loss = lossFunction, 
             optimizer = optimizer, 
             metrics=["mse"]  #metrics just for the sake of logging 
         )
