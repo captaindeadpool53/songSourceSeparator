@@ -9,6 +9,12 @@ import tensorflow as tf
 class PipelineHandler:
     defaultWeightDecay = 1e-6
     defaultLearningRate = 1e-3
+    
+    lossFunctionForAlpha = {
+        1: EvaluationHandler.drumsLossFunction1,
+        0.5: EvaluationHandler.drumsLossFunction5,
+        0: EvaluationHandler.drumsLossFunction0
+    }
 
     def __init__(self, datasetRootPath, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS = 2, songToPredictPath = None, modelCheckpointPath = Constants.CHECKPOINT_PATH.value):
         self.config: ConfigurationHandler = ConfigurationHandler(datasetRootPath, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS , songToPredictPath)
@@ -29,15 +35,17 @@ class PipelineHandler:
         self.trainingDataset, self.testDataset = self.datasetHandler.loadAndPreprocessData(type = Constants.TRAINING_DATA)
 
 
-    def trainModel(self, weightDecay=defaultWeightDecay, learningRate = defaultLearningRate, alpha = 1.0):
+    def trainModel(self, weightDecay=defaultWeightDecay, learningRate = defaultLearningRate, alpha = 0):
         if os.path.exists(self.modelCheckpointPath): 
             self.unetModel = tf.keras.models.load_model(self.modelCheckpointPath)
         else:
             self.unetModel = UNET(self.config.INPUT_SHAPE, self.config.NUMBER_OF_OUTPUT_CHANNELS)
-            
+        
+        lossFunction = PipelineHandler.lossFunctionForAlpha[alpha]
+        
         optimizer = tf.keras.optimizers.AdamW(weight_decay=weightDecay, learning_rate=learningRate)
         self.unetModel.compile(
-            loss = lambda : EvaluationHandler.drumsLossFunction(alpha=alpha), 
+            loss = lambda : lossFunction, 
             optimizer = optimizer, 
             metrics=["mse"]  #metrics just for the sake of logging 
         )
