@@ -22,7 +22,7 @@ class Constants(Enum):
 	PREDICTION_DATA = 'prediction'
 	ALL_DATA = "all"
 
-	BATCH_SIZE = 32
+	BATCH_SIZE = 8
 
 
 
