@@ -243,8 +243,8 @@ class DatasetHandler:
 
 	def splitDataset(self):
 		self.spectrogramDataset = self.spectrogramDataset.shuffle(buffer_size= self.totalTrainingExamples)
-		self.trainingDataset = self.spectrogramDataset.take(int( 0.8*self.totalTrainingExamples)).repeat().batch(batch_size=Constants.BATCH_SIZE.value)
-		self.testingDataset = self.spectrogramDataset.skip(int( 0.8*self.totalTrainingExamples)).repeat().batch(batch_size=Constants.BATCH_SIZE.value)
+		self.trainingDataset = self.spectrogramDataset.take(int( 0.8*self.totalTrainingExamples)).batch(batch_size=Constants.BATCH_SIZE.value)
+		self.testingDataset = self.spectrogramDataset.skip(int( 0.8*self.totalTrainingExamples)).batch(batch_size=Constants.BATCH_SIZE.value)
 
 
 	def cacheDataset(self, dataSetType: Constants = Constants.ALL_DATA):
