@@ -8,6 +8,7 @@ class EvaluationHandler:
     """
 	Loss function when we have two tracks as output - drums and accompaniments
 	"""
+    @tf.function
     @staticmethod
     @keras.saving.register_keras_serializable()
     def drumsLossFunction5(target: tf.Tensor,prediction: tf.Tensor) -> float:
@@ -19,6 +20,7 @@ class EvaluationHandler:
         
         return totalLoss
     
+    @tf.function
     @staticmethod
     @keras.saving.register_keras_serializable()
     def drumsLossFunction1(target: tf.Tensor,prediction: tf.Tensor) -> float:
@@ -30,6 +32,7 @@ class EvaluationHandler:
         
         return totalLoss
     
+    @tf.function
     @staticmethod
     @keras.saving.register_keras_serializable()
     def drumsLossFunction0(target: tf.Tensor,prediction: tf.Tensor) -> float:

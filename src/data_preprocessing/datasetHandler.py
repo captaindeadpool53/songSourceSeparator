@@ -181,7 +181,8 @@ class DatasetHandler:
 		dictionaryUtil = DictionaryUtil(None, Constants.DICTIONAY_SAVE_PATH.value, 'spectrogramData.npy')
 		self.spectrogramData = dictionaryUtil.loadFromNpy()
 	
- 
+	
+	@tf.function
 	def convertToDataset(self):
 		if not self.spectrogramData:
 			self._loadSavedSpectrogramData()
@@ -196,7 +197,8 @@ class DatasetHandler:
 			output_signature = outputSignature    
 		)
   
-  
+
+	@tf.function
 	def convertToPredictionDataset(self):
 		self._updateShapeData()
 		outputSignature = (
@@ -214,6 +216,7 @@ class DatasetHandler:
  	x = [number of frequency bins, number of frames per segment, 1]
 	y = [number of frequency bins, number of frames per segment, 2]
 	"""
+	@tf.function
 	def datasetGenerator(self):
 		X= []
 		Y= []
@@ -229,7 +232,8 @@ class DatasetHandler:
 			
 			yield(x, y)
 
-  
+
+	@tf.function
 	def predictionDatasetGenerator(self):
 		X= []
 		for spectrogram in self.spectrogramsToPredict:
