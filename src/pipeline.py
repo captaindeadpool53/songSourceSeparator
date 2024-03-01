@@ -27,8 +27,6 @@ class PipelineHandler:
         self.testDataset: tf.data.Dataset = None
         self.modelCheckpointPath: str = modelCheckpointPath
 
-        self.strategy = ParameterServerStrategy(communication=tf.distribute.experimental.CollectiveCommunication.AUTO, cluster_resolver=None)
-
 
     def preprocess(self, trainingDataRootPath=None):
         if trainingDataRootPath:
@@ -40,47 +38,46 @@ class PipelineHandler:
 
     @tf.function
     def trainModel(self, weightDecay=defaultWeightDecay, learningRate = defaultLearningRate, alpha = 0):
-        with self.strategy.scope():
-            if os.path.exists(self.modelCheckpointPath): 
-                self.unetModel = tf.keras.models.load_model(self.modelCheckpointPath)
-            else:
-                self.unetModel = UNET(self.config.INPUT_SHAPE, self.config.NUMBER_OF_OUTPUT_CHANNELS)
-            
-            lossFunction = PipelineHandler.lossFunctionForAlpha[alpha]
-            
-            optimizer = tf.keras.optimizers.AdamW(weight_decay=weightDecay, learning_rate=learningRate)
-            self.unetModel.compile(
-                loss = lossFunction, 
-                optimizer = optimizer, 
-                metrics=["mse"]  #metrics just for the sake of logging 
-            )
+        if os.path.exists(self.modelCheckpointPath): 
+            self.unetModel = tf.keras.models.load_model(self.modelCheckpointPath)
+        else:
+            self.unetModel = UNET(self.config.INPUT_SHAPE, self.config.NUMBER_OF_OUTPUT_CHANNELS)
+        
+        lossFunction = PipelineHandler.lossFunctionForAlpha[alpha]
+        
+        optimizer = tf.keras.optimizers.AdamW(weight_decay=weightDecay, learning_rate=learningRate)
+        self.unetModel.compile(
+            loss = lossFunction, 
+            optimizer = optimizer, 
+            metrics=["mse"]  #metrics just for the sake of logging 
+        )
 
-            learningRateSchedulerCallback = tf.keras.callbacks.LearningRateScheduler(EvaluationHandler.learningRateScheduler)
+        learningRateSchedulerCallback = tf.keras.callbacks.LearningRateScheduler(EvaluationHandler.learningRateScheduler)
 
-            checkpointCallback = tf.keras.callbacks.ModelCheckpoint(
-                filepath=Constants.CHECKPOINT_PATH.value,
-                save_weights_only=False,
-                save_best_only=True,
-                monitor="val_loss",
-                verbose=1,
-            )
+        checkpointCallback = tf.keras.callbacks.ModelCheckpoint(
+            filepath=Constants.CHECKPOINT_PATH.value,
+            save_weights_only=False,
+            save_best_only=True,
+            monitor="val_loss",
+            verbose=1,
+        )
 
-            callbacks = [checkpointCallback, learningRateSchedulerCallback]
+        callbacks = [checkpointCallback, learningRateSchedulerCallback]
 
-            self.unetModel.fit(
-                self.trainingDataset,
-                validation_data = self.testDataset,
-                callbacks=callbacks,
-                batch_size=Constants.BATCH_SIZE.value,
-                epochs=40,
-                verbose=1
-            )
+        self.unetModel.fit(
+            self.trainingDataset,
+            validation_data = self.testDataset,
+            callbacks=callbacks,
+            batch_size=Constants.BATCH_SIZE.value,
+            epochs=40,
+            verbose=1
+        )
 
-            savePath = self.modelCheckpointPath.split('/')[0]
-            if not os.path.exists(savePath):
-                os.makedirs(savePath)
+        savePath = self.modelCheckpointPath.split('/')[0]
+        if not os.path.exists(savePath):
+            os.makedirs(savePath)
 
-            self.unetModel.save(self.modelCheckpointPath)
+        self.unetModel.save(self.modelCheckpointPath)
         
     @tf.function
     def predict(self, predictionDataPath=None):
@@ -94,23 +91,23 @@ class PipelineHandler:
             predictionDataset = self.predictionDatasetHandler.loadAndPreprocessData(
                 type=Constants.PREDICTION_DATA
             )
-            with self.strategy.scope():
-                print("::: Loading checkpoint model :::")
-                self.unetModel = tf.keras.models.load_model(self.modelCheckpointPath, compile=False)
-                optimizer = tf.keras.optimizers.AdamW(
-                    weight_decay=PipelineHandler.defaultWeightDecay,
-                    learning_rate=PipelineHandler.defaultLearningRate,
-                )
-                print("::: Loading successful :::")
-                
-                print("::: Compiling and Predicting result :::")
-                self.unetModel.compile(
-                    loss=EvaluationHandler.drumsLossFunction,
-                    optimizer=optimizer,
-                    metrics=["mse"],
-                )
-                predictedSpectrograms = self.unetModel.predict(predictionDataset)
 
-                self.predictionDatasetHandler.postProcessAndSavePrediction(
-                    predictedSpectrograms
-                )
+            print("::: Loading checkpoint model :::")
+            self.unetModel = tf.keras.models.load_model(self.modelCheckpointPath, compile=False)
+            optimizer = tf.keras.optimizers.AdamW(
+                weight_decay=PipelineHandler.defaultWeightDecay,
+                learning_rate=PipelineHandler.defaultLearningRate,
+            )
+            print("::: Loading successful :::")
+                
+            print("::: Compiling and Predicting result :::")
+            self.unetModel.compile(
+                loss=EvaluationHandler.drumsLossFunction,
+                optimizer=optimizer,
+                metrics=["mse"],
+            )
+            predictedSpectrograms = self.unetModel.predict(predictionDataset)
+
+            self.predictionDatasetHandler.postProcessAndSavePrediction(
+                predictedSpectrograms
+            )
