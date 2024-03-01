@@ -5,7 +5,6 @@ from src.evaluation.evaluationHandler import EvaluationHandler
 from src.model_architectures.unet import UNET
 from config.constants import Constants
 import tensorflow as tf
-from tensorflow.distribute.experimental import ParameterServerStrategy
 
 class PipelineHandler:
     defaultWeightDecay = 1e-6
