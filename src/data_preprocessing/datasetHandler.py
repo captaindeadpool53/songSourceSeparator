@@ -216,7 +216,6 @@ class DatasetHandler:
  	x = [number of frequency bins, number of frames per segment, 1]
 	y = [number of frequency bins, number of frames per segment, 2]
 	"""
-	@tf.function
 	def datasetGenerator(self):
 		X= []
 		Y= []
@@ -233,7 +232,6 @@ class DatasetHandler:
 			yield(x, y)
 
 
-	@tf.function
 	def predictionDatasetGenerator(self):
 		X= []
 		for spectrogram in self.spectrogramsToPredict:
