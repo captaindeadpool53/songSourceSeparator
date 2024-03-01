@@ -184,7 +184,6 @@ class DatasetHandler:
 		self.spectrogramData = dictionaryUtil.loadFromNpy()
 	
 	
-	@tf.function
 	def convertToDataset(self):
 		if not self.spectrogramData:
 			self._loadSavedSpectrogramData()
@@ -200,7 +199,6 @@ class DatasetHandler:
 		)
   
 
-	@tf.function
 	def convertToPredictionDataset(self):
 		self._updateShapeData()
 		outputSignature = (
