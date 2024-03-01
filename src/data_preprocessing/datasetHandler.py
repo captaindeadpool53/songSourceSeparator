@@ -297,26 +297,27 @@ class DatasetHandler:
   	"""
 	def loadAndPreprocessData(self, isForceStart: bool = False, type: Constants = Constants.TRAINING_DATA):
 		areSavedAudioUsed = False
-		areSavedSprectrogramsUsed = False
+		areSavedSpectrogramsUsed = False
 	
 		if type == Constants.TRAINING_DATA:
 			if not isForceStart:
-				if self._isSavedAudioDataAvailable():
+				if self._isSavedSpectrogramDataAvailable():
+					self._loadSavedSpectrogramData()
+					areSavedSpectrogramsUsed = True
+					self.totalTrainingExamples = len(self.spectrogramData)
+
+				if not areSavedSpectrogramsUsed and self._isSavedAudioDataAvailable():
 					self._loadSavedAudioData()
 					areSavedAudioUsed = True
 					self.totalTrainingExamples = len(self.audioData)
-		
-				if self._isSavedSpectrogramDataAvailable():
-					self._loadSavedSpectrogramData
-					areSavedSprectrogramsUsed = True
 			
-			if isForceStart or not self.audioData:
+			if (isForceStart  or not self.audioData) and not self.spectrogramData:
 				self.loadAudioData()
 			if isForceStart or not self.spectrogramData:
 				self.convertToSpectrogramData()
-			if (isForceStart or not areSavedAudioUsed) :
+			if (isForceStart or not areSavedAudioUsed) and not areSavedSpectrogramsUsed:
 				self.saveDataAsDictionary()
-			if (isForceStart or not areSavedSprectrogramsUsed) :
+			if (isForceStart or not areSavedSpectrogramsUsed) :
 				self.saveSpectrograms()
 		
 			self.convertToDataset()
