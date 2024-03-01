@@ -137,6 +137,8 @@ class DatasetHandler:
 				spectrogramData[trackType] = trackSpectrogram
 
 			self.spectrogramData[trackName] = spectrogramData
+		
+		self.audioData = None # Frees up memory, since audioData is no longer required
    
 
 	def convertToSpectrogramPredictionData(self):
@@ -353,8 +355,6 @@ class DatasetHandler:
 			trackPath = DirectoryHandler.joinPath(Constants.PREDICTION_RESULT_PATH.value, "Track" + str(trackTypeIndex) + ".wav")
 			sf.write(trackPath, finalPrediction, self.config.SAMPLE_RATE)
 			
-		
-
   
 	def visualiseSpectrogram(self, spectrogram: np.array):
 		plt.figure(figsize=(15, 10))
@@ -368,8 +368,6 @@ class DatasetHandler:
 		)  # adds a colorbar for different intensity levels
 		colorbar.ax.set_title("db")
 		plt.show()
-  
-  
 
 
 #Suggestion: add function to save spectrograms as images for better visual help
