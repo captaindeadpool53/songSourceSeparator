@@ -119,10 +119,7 @@ class UNET(Model):
 
 		blockOutput = self.finalConvLayer(blockOutput)
 
-		croppingValues = [int(tensor.numpy().item()) for tensor in self.croppingValues]
-		croppingTuple = tuple(croppingValues)
-
-		blockOutput = layers.Cropping2D(croppingTuple)(blockOutput)
+		blockOutput = layers.Cropping2D(self.croppingValues)(blockOutput)
 
 		return blockOutput
 
