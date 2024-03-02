@@ -314,7 +314,7 @@ class DatasetHandler:
 				self.loadAudioData()
 			if isForceStart or not self.spectrogramData:
 				self.convertToSpectrogramData()
-			if (isForceStart or not areSavedAudioUsed) and not self.spectrogramData:
+			if (isForceStart or not areSavedAudioUsed) and not areSavedSpectrogramsUsed:
 				self.saveDataAsDictionary()
 			if (isForceStart or not areSavedSpectrogramsUsed) :
 				self.saveSpectrograms()
