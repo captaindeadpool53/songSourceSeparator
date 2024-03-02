@@ -53,7 +53,7 @@ class PipelineHandler:
         learningRateSchedulerCallback = tf.keras.callbacks.LearningRateScheduler(EvaluationHandler.learningRateScheduler)
 
         checkpointCallback = tf.keras.callbacks.ModelCheckpoint(
-            filepath=Constants.CHECKPOINT_PATH.value,
+            filepath=self.modelCheckpointPath,
             save_weights_only=False,
             save_best_only=True,
             monitor="val_loss",
