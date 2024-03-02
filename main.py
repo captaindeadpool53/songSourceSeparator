@@ -3,7 +3,7 @@ import argparse
 from src.pipeline import PipelineHandler
 
 
-def main(datasetRootPath, songToPredictPath, modelCheckpointPath, learningRate, alpha, weightDecay):
+def main(datasetRootPath, songToPredictPath, modelCheckpointPath, learningRate, alpha, weightDecay, epochs):
     datasetRootPath = datasetRootPath if datasetRootPath else Constants.TRAINING_DATA_DEFAULT_ROOT_PATH.value
     songToPredictPath = songToPredictPath if songToPredictPath else Constants.SONG_TO_SEPERATE_DEFAULT_PATH.value
 
@@ -22,6 +22,7 @@ def main(datasetRootPath, songToPredictPath, modelCheckpointPath, learningRate, 
         weightDecay = weightDecay,
         learningRate = learningRate,
         alpha = alpha,
+        epochs = epochs
     )
     pipelineHandler.predict()
 
@@ -35,6 +36,7 @@ if __name__=="__main__":
     parser.add_argument("learningRate", type=float, help="Hyperparameter learning rate")
     parser.add_argument("alpha", type=float, help="Hyperparameter alpha to control the weight on the tracks in the loss function")
     parser.add_argument("weightDecay", type=float, help="Hyperparameter for regularisation")
+    parser.add_argument("epochs", type=int, help="Hyperparameter for regularisation")
     
     args = parser.parse_args()
-    main(args.datasetRootPath, args.songToPredictPath, args.modelCheckpointPath, args.learningRate, args.alpha, args.weightDecay)
+    main(args.datasetRootPath, args.songToPredictPath, args.modelCheckpointPath, args.learningRate, args.alpha, args.weightDecay, args.epochs)

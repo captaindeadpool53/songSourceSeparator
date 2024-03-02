@@ -35,7 +35,7 @@ class PipelineHandler:
         self.trainingDataset, self.testDataset = self.datasetHandler.loadAndPreprocessData(type = Constants.TRAINING_DATA)
 
 
-    def trainModel(self, weightDecay=defaultWeightDecay, learningRate = defaultLearningRate, alpha = 0):
+    def trainModel(self, weightDecay=defaultWeightDecay, learningRate = defaultLearningRate, alpha = 0, epochs = 40):
         if os.path.exists(self.modelCheckpointPath): 
             self.unetModel = tf.keras.models.load_model(self.modelCheckpointPath)
         else:
@@ -67,7 +67,7 @@ class PipelineHandler:
             validation_data = self.testDataset,
             callbacks=callbacks,
             batch_size=Constants.BATCH_SIZE.value,
-            epochs=40,
+            epochs=epochs,
             verbose=1
         )
 
