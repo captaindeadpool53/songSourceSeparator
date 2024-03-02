@@ -130,16 +130,12 @@ class UNET(Model):
  
 	These padded amounts will be stored and later used to crop the final output according the initial padding values.
 	'''
-	@tf.function
 	def _padInputForDivisibility(self, input: tf.Tensor):
 			
 		input, heightwisePadding = self._padSymmetrically(input, input.shape[1], "height")	
 		input, widthwisePadding = self._padSymmetrically(input, input.shape[2], "width")			
 			
-		self.croppingValues = (
-			tuple([int(padding.numpy()) for padding in heightwisePadding]), 
-			tuple([int(padding.numpy()) for padding in heightwisePadding])
-			)
+		self.croppingValues = (heightwisePadding, widthwisePadding)
 		return input
 
 
