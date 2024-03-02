@@ -139,7 +139,6 @@ class UNET(Model):
 		return input
 
 
-	@tf.function
 	def _padSymmetrically(self, input:tf.Tensor, dimensionShape, paddingOrientation):
 		paddingAhead, paddingBehind, totalPadding = 0, 0, 0
   
