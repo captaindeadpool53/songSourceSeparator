@@ -180,7 +180,7 @@ class DatasetHandler:
 
 
 	def _loadSavedAudioData(self):
-		dictionaryUtil = DictionaryUtil(None, Constants.DICTIONAY_SAVE_PATH.value, 'spectrogramData.npy')
+		dictionaryUtil = DictionaryUtil(None, Constants.DICTIONAY_SAVE_PATH.value, 'audioData.npy')
 		self.spectrogramData = dictionaryUtil.loadFromNpy()
 	
 	
