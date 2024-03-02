@@ -127,6 +127,7 @@ class DatasetHandler:
 
 	def convertToSpectrogramData(self) -> None:
 		if not self.audioData:
+			print(":::audioData not found to convert to spectrogramData:::")
 			self._loadSavedAudioData()
    
 		for trackName, trackData in self.audioData.items():
