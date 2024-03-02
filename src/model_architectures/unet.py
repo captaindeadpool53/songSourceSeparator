@@ -1,5 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras import layers, activations, Model
+import tensorflow_addons as tfa
 
 
 class UNET(Model):
@@ -119,7 +120,7 @@ class UNET(Model):
 
 		blockOutput = self.finalConvLayer(blockOutput)
 
-		blockOutput = layers.Cropping2D(self.croppingValues)(blockOutput)
+		blockOutput = tfa.layers.Cropping2D(self.croppingValues)(blockOutput)
 
 		return blockOutput
 
