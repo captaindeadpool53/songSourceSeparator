@@ -136,7 +136,7 @@ class UNET(Model):
 		input, heightwisePadding = self._padSymmetrically(input, input.shape[1], "height")	
 		input, widthwisePadding = self._padSymmetrically(input, input.shape[2], "width")			
 			
-		self.croppingValues = (heightwisePadding, widthwisePadding)
+		self.croppingValues = (int(heightwisePadding.numpy()), (widthwisePadding.numpy()))
 		return input
 
 
