@@ -61,6 +61,7 @@ class PipelineHandler:
 
         callbacks = [checkpointCallback, learningRateSchedulerCallback]
 
+        print("::: Beginning training :::")
         self.unetModel.fit(
             self.trainingDataset,
             validation_data = self.testDataset,
