@@ -10,7 +10,6 @@ class EvaluationHandler:
 	"""
     @tf.function
     @staticmethod
-    @keras.saving.register_keras_serializable()
     def drumsLossFunction5(target: tf.Tensor,prediction: tf.Tensor) -> float:
         alpha =0.5
         drumsTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 0] - target[..., 0]))
@@ -22,7 +21,6 @@ class EvaluationHandler:
     
     @tf.function
     @staticmethod
-    @keras.saving.register_keras_serializable()
     def drumsLossFunction1(target: tf.Tensor,prediction: tf.Tensor) -> float:
         alpha =1
         drumsTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 0] - target[..., 0]))
@@ -34,7 +32,6 @@ class EvaluationHandler:
     
     @tf.function
     @staticmethod
-    @keras.saving.register_keras_serializable()
     def drumsLossFunction0(target: tf.Tensor,prediction: tf.Tensor) -> float:
         alpha =0
         drumsTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 0] - target[..., 0]))

@@ -36,25 +36,24 @@ class PipelineHandler:
 
 
     def trainModel(self, weightDecay=defaultWeightDecay, learningRate = defaultLearningRate, alpha = 0, epochs = 40):
-        if os.path.exists(self.modelCheckpointPath): 
-            self.unetModel = tf.keras.models.load_model(self.modelCheckpointPath)
-        else:
-            self.unetModel = UNET(self.config.INPUT_SHAPE, self.config.NUMBER_OF_OUTPUT_CHANNELS)
+        self.unetModel = self._initiateModel()
+
+        if os.path.exists(self.modelCheckpointPath):
+           _loadWeights()
         
         lossFunction = PipelineHandler.lossFunctionForAlpha[alpha]
         
         optimizer = tf.keras.optimizers.AdamW(weight_decay=weightDecay, learning_rate=learningRate)
         self.unetModel.compile(
             loss = lossFunction, 
-            optimizer = optimizer, 
-            metrics=["mse"]  #metrics just for the sake of logging 
+            optimizer = optimizer
         )
 
         learningRateSchedulerCallback = tf.keras.callbacks.LearningRateScheduler(EvaluationHandler.learningRateScheduler)
 
         checkpointCallback = tf.keras.callbacks.ModelCheckpoint(
             filepath=self.modelCheckpointPath,
-            save_weights_only=False,
+            save_weights_only=True,
             save_best_only=True,
             monitor="val_loss",
             verbose=1,
@@ -75,7 +74,7 @@ class PipelineHandler:
         if not os.path.exists(savePath):
             os.makedirs(savePath)
 
-        self.unetModel.save(self.modelCheckpointPath)
+        self.unetModel.save_weights(self.modelCheckpointPath)
         
 
     def predict(self, predictionDataPath=None):
@@ -90,8 +89,8 @@ class PipelineHandler:
                 type=Constants.PREDICTION_DATA
             )
 
-            print("::: Loading checkpoint model :::")
-            self.unetModel = tf.keras.models.load_model(self.modelCheckpointPath, compile=False)
+            self.unetModel = self._initiateModel()
+            _loadWeights()
             optimizer = tf.keras.optimizers.AdamW(
                 weight_decay=PipelineHandler.defaultWeightDecay,
                 learning_rate=PipelineHandler.defaultLearningRate,
@@ -102,10 +101,19 @@ class PipelineHandler:
             self.unetModel.compile(
                 loss=EvaluationHandler.drumsLossFunction,
                 optimizer=optimizer,
-                metrics=["mse"],
             )
             predictedSpectrograms = self.unetModel.predict(predictionDataset)
 
             self.predictionDatasetHandler.postProcessAndSavePrediction(
                 predictedSpectrograms
             )
+            
+
+    def _initiateModel(self):
+        return UNET(self.config.INPUT_SHAPE, self.config.NUMBER_OF_OUTPUT_CHANNELS)
+
+
+    def _loadWeights(self):
+        print("::: Loading saved model weights :::") 
+        self.unetModel.load_weights(self.modelCheckpointPath)
+        print("::: Sucessfuly loaded saved model weights :::") 
