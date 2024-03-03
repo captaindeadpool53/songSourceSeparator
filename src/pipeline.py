@@ -70,6 +70,7 @@ class PipelineHandler:
             epochs=epochs,
             verbose=1
         )
+        print("::: Finished Training :::")
         savePath = os.path.dirname(self.modelCheckpointPath)
         if not os.path.exists(savePath):
             os.makedirs(savePath)
