@@ -340,14 +340,14 @@ class DatasetHandler:
 		self.predictedSpectrogram = self.predictedSpectrogram[:, :complexPhases.shape[1], :]  #removes the added padding during segmentation of data
 		complexValuedSpectrogram = np.multiply(complexPhases, self.predictedSpectrogram)
 
-		if not os.path.exists(Constants.PREDICTION_RESULT_PATH.value):
-				os.makedirs(Constants.PREDICTION_RESULT_PATH.value)
+		if not os.path.exists(self.config.PREDICTION_RESULT_PATH):
+				os.makedirs(self.config.PREDICTION_RESULT_PATH)
   
 		for trackTypeIndex in range(complexValuedSpectrogram.shape[-1]):
 			individualComplexValuedSpectrogram = np.squeeze(complexValuedSpectrogram[...,trackTypeIndex])
 			finalPrediction = librosa.istft(individualComplexValuedSpectrogram, hop_length=self.config.HOP_LENGTH, n_fft = self.config.FRAME_SIZE) #istft to move the audio from time-frequency domain to time-domain
    
-			trackPath = DirectoryHandler.joinPath(Constants.PREDICTION_RESULT_PATH.value, "Track" + str(trackTypeIndex) + ".wav")
+			trackPath = DirectoryHandler.joinPath(self.config.PREDICTION_RESULT_PATH, "Track" + str(trackTypeIndex) + ".wav")
 			sf.write(trackPath, finalPrediction, self.config.SAMPLE_RATE)
 			
   
