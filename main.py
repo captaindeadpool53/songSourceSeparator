@@ -3,7 +3,7 @@ import argparse
 from src.pipeline import PipelineHandler
 
 
-def main(datasetRootPath, songToPredictPath, modelCheckpointPath, learningRate, alpha, weightDecay, epochs):
+def main(datasetRootPath, songToPredictPath, modelCheckpointPath, dictionarySavePath, learningRate, alpha, weightDecay, epochs):
     datasetRootPath = datasetRootPath if datasetRootPath else Constants.TRAINING_DATA_DEFAULT_ROOT_PATH.value
     songToPredictPath = songToPredictPath if songToPredictPath else Constants.SONG_TO_SEPERATE_DEFAULT_PATH.value
 
@@ -14,7 +14,8 @@ def main(datasetRootPath, songToPredictPath, modelCheckpointPath, learningRate, 
         SAMPLE_RATE=16000,
         datasetRootPath= datasetRootPath,
         songToPredictPath = songToPredictPath,
-        modelCheckpointPath = modelCheckpointPath
+        modelCheckpointPath = modelCheckpointPath,
+        dictionarySavePath = dictionarySavePath
     )
 
     pipelineHandler.preprocess()
@@ -36,7 +37,8 @@ if __name__=="__main__":
     parser.add_argument("learningRate", type=float, help="Hyperparameter learning rate")
     parser.add_argument("alpha", type=float, help="Hyperparameter alpha to control the weight on the tracks in the loss function")
     parser.add_argument("weightDecay", type=float, help="Hyperparameter for regularisation")
-    parser.add_argument("epochs", type=int, help="Hyperparameter for regularisation")
+    parser.add_argument("epochs", type=int, help="epochs")
+    parser.add_argument("dictionarySavePath", type=int, help="dictionarySavePath")
     
     args = parser.parse_args()
-    main(args.datasetRootPath, args.songToPredictPath, args.modelCheckpointPath, args.learningRate, args.alpha, args.weightDecay, args.epochs)
+    main(args.datasetRootPath, args.songToPredictPath, args.modelCheckpointPath, args.dictionarySavePath, args.learningRate, args.alpha, args.weightDecay, args.epochs)

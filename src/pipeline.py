@@ -16,8 +16,8 @@ class PipelineHandler:
         0: EvaluationHandler.drumsLossFunction0
     }
 
-    def __init__(self, datasetRootPath, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS = 2, songToPredictPath = None, modelCheckpointPath = Constants.CHECKPOINT_PATH.value):
-        self.config: ConfigurationHandler = ConfigurationHandler(datasetRootPath, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS , songToPredictPath)
+    def __init__(self, datasetRootPath, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS = 2, songToPredictPath = None, modelCheckpointPath = Constants.CHECKPOINT_PATH.value, dictionarySavePath = Constants.DICTIONAY_SAVE_PATH):
+        self.config: ConfigurationHandler = ConfigurationHandler(datasetRootPath, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS , songToPredictPath, dictionarySavePath)
         self.datasetHandler: DatasetHandler = None 
         self.unetModel: UNET = None
         self.predictionDatasetHandler: DatasetHandler = None 

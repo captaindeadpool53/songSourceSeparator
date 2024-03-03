@@ -151,14 +151,14 @@ class DatasetHandler:
 
 
 	def _isSavedSpectrogramDataAvailable(self):
-		filePath = DirectoryHandler.joinPath(Constants.DICTIONAY_SAVE_PATH.value, 'spectrogramData.npy')
+		filePath = DirectoryHandler.joinPath(self.config.DICTIONAY_SAVE_PATH, 'spectrogramData.npy')
   
 		if os.path.exists(filePath):
 			return True
 		return False
 
 	def _isSavedAudioDataAvailable(self):
-		filePath = DirectoryHandler.joinPath(Constants.DICTIONAY_SAVE_PATH.value, 'audioData.npy')
+		filePath = DirectoryHandler.joinPath(self.config.DICTIONAY_SAVE_PATH, 'audioData.npy')
   
 		if os.path.exists(filePath):
 			return True
@@ -166,22 +166,22 @@ class DatasetHandler:
 
 
 	def saveDataAsDictionary(self):
-		dictionaryUtil = DictionaryUtil(self.audioData, Constants.DICTIONAY_SAVE_PATH.value, 'audioData.npy')
+		dictionaryUtil = DictionaryUtil(self.audioData, self.config.DICTIONAY_SAVE_PATH, 'audioData.npy')
 		dictionaryUtil.saveAsNpy()
 
 
 	def saveSpectrograms(self):
-		dictionaryUtil = DictionaryUtil(self.spectrogramData, Constants.DICTIONAY_SAVE_PATH.value, 'spectrogramData.npy')
+		dictionaryUtil = DictionaryUtil(self.spectrogramData, self.config.DICTIONAY_SAVE_PATH, 'spectrogramData.npy')
 		dictionaryUtil.saveAsNpy()
 	
 
 	def _loadSavedSpectrogramData(self):
-		dictionaryUtil = DictionaryUtil(None, Constants.DICTIONAY_SAVE_PATH.value, 'spectrogramData.npy')
+		dictionaryUtil = DictionaryUtil(None, self.config.DICTIONAY_SAVE_PATH, 'spectrogramData.npy')
 		self.spectrogramData = dictionaryUtil.loadFromNpy()
 
 
 	def _loadSavedAudioData(self):
-		dictionaryUtil = DictionaryUtil(None, Constants.DICTIONAY_SAVE_PATH.value, 'audioData.npy')
+		dictionaryUtil = DictionaryUtil(None, self.config.DICTIONAY_SAVE_PATH, 'audioData.npy')
 		self.spectrogramData = dictionaryUtil.loadFromNpy()
 	
 	
