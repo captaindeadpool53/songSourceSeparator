@@ -109,7 +109,9 @@ class PipelineHandler:
             
 
     def _initiateModel(self):
-        return UNET(self.config.INPUT_SHAPE, self.config.NUMBER_OF_OUTPUT_CHANNELS)
+        self.unetModel = UNET(self.config.INPUT_SHAPE, self.config.NUMBER_OF_OUTPUT_CHANNELS)
+        _ = self.unetModel(tf.ones(self.INPUT_SHAPE))
+        return self.unetModel
 
 
     def _loadWeights(self):
