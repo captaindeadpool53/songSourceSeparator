@@ -39,7 +39,7 @@ class PipelineHandler:
         self.unetModel = self._initiateModel()
 
         if os.path.exists(self.modelCheckpointPath):
-           _loadWeights()
+           self._loadWeights()
         
         lossFunction = PipelineHandler.lossFunctionForAlpha[alpha]
         
@@ -89,7 +89,7 @@ class PipelineHandler:
             )
 
             self.unetModel = self._initiateModel()
-            _loadWeights()
+            self._loadWeights()
             optimizer = tf.keras.optimizers.AdamW(
                 weight_decay=PipelineHandler.defaultWeightDecay,
                 learning_rate=PipelineHandler.defaultLearningRate,
