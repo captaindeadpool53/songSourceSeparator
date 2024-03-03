@@ -11,9 +11,11 @@ class PipelineHandler:
     defaultLearningRate = 1e-3
     
     lossFunctionForAlpha = {
-        1: EvaluationHandler.drumsLossFunction1,
+        0: EvaluationHandler.drumsLossFunction0,
         0.5: EvaluationHandler.drumsLossFunction5,
-        0: EvaluationHandler.drumsLossFunction0
+        0.8: EvaluationHandler.drumsLossFunction8,
+        0.9: EvaluationHandler.drumsLossFunction9,
+        1: EvaluationHandler.drumsLossFunction1
     }
 
     def __init__(self, datasetRootPath, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS = 2, songToPredictPath = None, modelCheckpointPath = Constants.CHECKPOINT_PATH.value, dictionarySavePath = Constants.DICTIONAY_SAVE_PATH, predictionResultPath = Constants.PREDICTION_RESULT_PATH.value):

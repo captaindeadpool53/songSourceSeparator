@@ -40,6 +40,29 @@ class EvaluationHandler:
         totalLoss = alpha * drumsTrackLoss + (1 - alpha) * accompanimentTrackLoss
         
         return totalLoss
+
+    @tf.function
+    @staticmethod
+    def drumsLossFunction9(target: tf.Tensor,prediction: tf.Tensor) -> float:
+        alpha =0.9
+        drumsTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 0] - target[..., 0]))
+        accompanimentTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 1] -target[...,1]))
+
+        totalLoss = alpha * drumsTrackLoss + (1 - alpha) * accompanimentTrackLoss
+        
+        return totalLoss
+    
+    @tf.function
+    @staticmethod
+    def drumsLossFunction8(target: tf.Tensor,prediction: tf.Tensor) -> float:
+        alpha =0.8
+        drumsTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 0] - target[..., 0]))
+        accompanimentTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 1] -target[...,1]))
+
+        totalLoss = alpha * drumsTrackLoss + (1 - alpha) * accompanimentTrackLoss
+        
+        return totalLoss
+    
     
     @staticmethod
     def learningRateScheduler(epoch:int, lr:float)->float:
