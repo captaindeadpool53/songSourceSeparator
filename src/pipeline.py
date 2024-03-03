@@ -69,8 +69,7 @@ class PipelineHandler:
             epochs=epochs,
             verbose=1
         )
-
-        savePath = self.modelCheckpointPath.split('/')[:-1]
+        savePath = os.path.dirname(self.modelCheckpointPath)
         if not os.path.exists(savePath):
             os.makedirs(savePath)
 
