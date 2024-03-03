@@ -337,9 +337,6 @@ class DatasetHandler:
 		complexPhases = Spectrogram.extractLogSpectrogramPhase(self.audioSegmentsToPredict, self.config.FRAME_SIZE, self.config.HOP_LENGTH)
 		complexPhases = complexPhases[..., np.newaxis]
   
-		print("Predicted spectrogram's shape: "+ str(self.predictedSpectrogram.shape))
-		print("complexPhases shape: "+ str(complexPhases.shape))
-		
 		self.predictedSpectrogram = self.predictedSpectrogram[:, :complexPhases.shape[1], :]  #removes the added padding during segmentation of data
 		complexValuedSpectrogram = np.multiply(complexPhases, self.predictedSpectrogram)
 
