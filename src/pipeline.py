@@ -25,6 +25,7 @@ class PipelineHandler:
         self.trainingDataset: tf.data.Dataset = None
         self.testDataset: tf.data.Dataset = None
         self.modelCheckpointPath: str = modelCheckpointPath
+        self.lossFunction = None
 
 
     def preprocess(self, trainingDataRootPath=None):
@@ -41,11 +42,11 @@ class PipelineHandler:
         if os.path.exists(self.modelCheckpointPath):
            self._loadWeights()
         
-        lossFunction = PipelineHandler.lossFunctionForAlpha[alpha]
+        self.lossFunction = PipelineHandler.lossFunctionForAlpha[alpha]
         
         optimizer = tf.keras.optimizers.AdamW(weight_decay=weightDecay, learning_rate=learningRate)
         self.unetModel.compile(
-            loss = lossFunction, 
+            loss = self.lossFunction, 
             optimizer = optimizer
         )
 
@@ -100,7 +101,7 @@ class PipelineHandler:
                 
             print("::: Compiling and Predicting result :::")
             self.unetModel.compile(
-                loss=EvaluationHandler.drumsLossFunction,
+                loss=self.lossFunction,
                 optimizer=optimizer,
             )
             predictedSpectrograms = self.unetModel.predict(predictionDataset)
