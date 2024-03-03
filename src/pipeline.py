@@ -74,11 +74,13 @@ class PipelineHandler:
             verbose=1
         )
         print("::: Finished Training :::")
+        print("::: Saving model weights :::")
         savePath = os.path.dirname(self.modelCheckpointPath)
         if not os.path.exists(savePath):
             os.makedirs(savePath)
 
         self.unetModel.save_weights(self.modelCheckpointPath)
+        print("::: Successfully saved weights :::")
         
 
     def predict(self, predictionDataPath=None):
