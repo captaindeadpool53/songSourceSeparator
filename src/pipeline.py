@@ -13,8 +13,8 @@ class PipelineHandler:
     lossFunctionForAlpha = {
         0: EvaluationHandler.drumsLossFunction0,
         0.5: EvaluationHandler.drumsLossFunction5,
-        0.8: EvaluationHandler.drumsLossFunction8,
-        0.9: EvaluationHandler.drumsLossFunction9,
+        0.1: EvaluationHandler.drumsLossFunction01,
+        0.2: EvaluationHandler.drumsLossFunction2,
         1: EvaluationHandler.drumsLossFunction1
     }
 

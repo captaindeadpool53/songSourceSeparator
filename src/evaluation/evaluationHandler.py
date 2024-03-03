@@ -43,8 +43,8 @@ class EvaluationHandler:
 
     @tf.function
     @staticmethod
-    def drumsLossFunction9(target: tf.Tensor,prediction: tf.Tensor) -> float:
-        alpha =0.9
+    def drumsLossFunction01(target: tf.Tensor,prediction: tf.Tensor) -> float:
+        alpha =0.1
         drumsTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 0] - target[..., 0]))
         accompanimentTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 1] -target[...,1]))
 
@@ -54,8 +54,8 @@ class EvaluationHandler:
     
     @tf.function
     @staticmethod
-    def drumsLossFunction8(target: tf.Tensor,prediction: tf.Tensor) -> float:
-        alpha =0.8
+    def drumsLossFunction2(target: tf.Tensor,prediction: tf.Tensor) -> float:
+        alpha =0.2
         drumsTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 0] - target[..., 0]))
         accompanimentTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 1] -target[...,1]))
 
