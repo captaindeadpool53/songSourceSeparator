@@ -181,7 +181,7 @@ class DatasetHandler:
 
 	def _loadSavedAudioData(self):
 		dictionaryUtil = DictionaryUtil(None, self.config.DICTIONAY_SAVE_PATH, Constants.AUDIO_DATA_NPY.value)
-		self.spectrogramData = dictionaryUtil.loadFromNpy()
+		self.audioData = dictionaryUtil.loadFromNpy()
 
 
 	def _loadSavedMemoryMap(self):
