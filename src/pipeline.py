@@ -18,7 +18,7 @@ class PipelineHandler:
         1: EvaluationHandler.drumsLossFunction1
     }
 
-    def __init__(self, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS = 2, PROJECT_ROOT_PATH, BATCH_SIZE):
+    def __init__(self, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, PROJECT_ROOT_PATH, BATCH_SIZE, NUMBER_OF_OUTPUT_CHANNELS = 2):
         self.config: ConfigurationHandler = ConfigurationHandler(PROJECT_ROOT_PATH, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS, BATCH_SIZE)
 
         self.datasetHandler: DatasetHandler = None 
