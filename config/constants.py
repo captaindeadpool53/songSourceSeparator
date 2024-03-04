@@ -15,6 +15,8 @@ class Constants(Enum):
 	DRUMS = 'drums.wav'
 	ACCOMPANIMENTS = 'accompaniments.wav'
 	MIX = 'mix.wav'
+	SPECTROGRAM_MEMORY_MAP = 'spectrogramData.mmap'
+	AUDIO_DATA_NPY = 'audioData.npy'
 
 	#Dataset types
 	TRAINING_DATA = 'training'

@@ -152,14 +152,15 @@ class DatasetHandler:
 
 
 	def _isSavedSpectrogramDataAvailable(self):
-		filePath = DirectoryHandler.joinPath(self.config.DICTIONAY_SAVE_PATH, 'spectrogramData.npy')
+		filePath = DirectoryHandler.joinPath(self.config.DICTIONAY_SAVE_PATH, Constants.SPECTROGRAM_MEMORY_MAP.value)
   
 		if os.path.exists(filePath):
 			return True
 		return False
 
+
 	def _isSavedAudioDataAvailable(self):
-		filePath = DirectoryHandler.joinPath(self.config.DICTIONAY_SAVE_PATH, 'audioData.npy')
+		filePath = DirectoryHandler.joinPath(self.config.DICTIONAY_SAVE_PATH, Constants.AUDIO_DATA_NPY.value)
   
 		if os.path.exists(filePath):
 			return True
@@ -167,42 +168,30 @@ class DatasetHandler:
 
 
 	def saveDataAsDictionary(self):
-		dictionaryUtil = DictionaryUtil(self.audioData, self.config.DICTIONAY_SAVE_PATH, 'audioData.npy')
+		dictionaryUtil = DictionaryUtil(self.audioData, self.config.DICTIONAY_SAVE_PATH, Constants.AUDIO_DATA_NPY.value)
 		dictionaryUtil.saveAsNpy()
 
-
-	def saveSpectrograms(self):
-		dictionaryUtil = DictionaryUtil(self.spectrogramData, self.config.DICTIONAY_SAVE_PATH, 'spectrogramData.npy')
-		dictionaryUtil.saveAsNpy()
-	
 
 	def saveSpectrogramsAsMemoryMap(self):
-		dictionaryUtil = DictionaryUtil(self.spectrogramData, self.config.DICTIONAY_SAVE_PATH, 'spectrogramData.mmap')
+		dictionaryUtil = DictionaryUtil(self.spectrogramData, self.config.DICTIONAY_SAVE_PATH, Constants.SPECTROGRAM_MEMORY_MAP.value)
 		dictionaryUtil.saveMemoryMap()
 
 		self.spectrogramData = None #Freeing up space
-	
-
-	def _loadSavedSpectrogramData(self):
-		dictionaryUtil = DictionaryUtil(None, self.config.DICTIONAY_SAVE_PATH, 'spectrogramData.npy')
-		self.spectrogramData = dictionaryUtil.loadFromNpy()
 
 
 	def _loadSavedAudioData(self):
-		dictionaryUtil = DictionaryUtil(None, self.config.DICTIONAY_SAVE_PATH, 'audioData.npy')
+		dictionaryUtil = DictionaryUtil(None, self.config.DICTIONAY_SAVE_PATH, Constants.AUDIO_DATA_NPY.value)
 		self.spectrogramData = dictionaryUtil.loadFromNpy()
 
 
 	def _loadSavedMemoryMap(self):
-		dictionaryUtil = DictionaryUtil(None, self.config.DICTIONAY_SAVE_PATH, 'spectrogramData.mmap')
+		dictionaryUtil = DictionaryUtil(None, self.config.DICTIONAY_SAVE_PATH, Constants.SPECTROGRAM_MEMORY_MAP.value)
 		self.spectrogramMemoryMap = dictionaryUtil.loadMemoryMap()
 	
 	
 	def convertToDataset(self):
-		if not self.spectrogramData:
-			self._loadSavedSpectrogramData()
-
-		_loadSavedMemoryMap()
+		if not self.spectrogramMemoryMap:
+			self._loadSavedMemoryMap()
 
 		self._updateShapeData()
 		outputSignature = (
@@ -230,7 +219,7 @@ class DatasetHandler:
 	"""
 	Outputs one training example at a time with shape: 
  	x = [batchSize(or lower), number of frequency bins, number of frames per segment, 1]
-	y = [batchSize(or lower), number of frequency bins, number of frames per segment, 2]
+	y = [batchSize(or lower), number of frequency bins, number of frames per segment, number of output channels]
 	"""
 	def datasetGenerator(self):
 		batchSize = self.config.BATCH_SIZE.value
@@ -341,23 +330,21 @@ class DatasetHandler:
 		if type == Constants.TRAINING_DATA:
 			if not isForceStart:
 				if self._isSavedSpectrogramDataAvailable():
-					self._loadSavedSpectrogramData()
+					_loadSavedMemoryMap()
 					areSavedSpectrogramsUsed = True
-					self.totalTrainingExamples = len(self.spectrogramData)
+					self.totalTrainingExamples = len(self.spectrogramMemoryMap)
 
 				if not areSavedSpectrogramsUsed and self._isSavedAudioDataAvailable():
 					self._loadSavedAudioData()
 					areSavedAudioUsed = True
 					self.totalTrainingExamples = len(self.audioData)
 			
-			if (isForceStart  or not self.audioData) and not self.spectrogramData:
+			if (isForceStart  or not self.audioData) and not areSavedSpectrogramsUsed:
 				self.loadAudioData()
-			if isForceStart or not self.spectrogramData:
-				self.convertToSpectrogramData()
-			if (isForceStart or not areSavedAudioUsed) and not areSavedSpectrogramsUsed:
 				self.saveDataAsDictionary()
-			if (isForceStart or not areSavedSpectrogramsUsed) :
-				self.saveSpectrograms()
+			if isForceStart or not areSavedSpectrogramsUsed:
+				self.convertToSpectrogramData()
+				self.saveSpectrogramsAsMemoryMap()
 
 			self.convertToDataset()
 			self.splitDataset()
