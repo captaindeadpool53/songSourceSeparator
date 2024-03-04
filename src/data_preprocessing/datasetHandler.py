@@ -23,6 +23,7 @@ class DatasetHandler:
 		self.trainingDataset: tf.data.Dataset = None
 		self.testingDataset: tf.data.Dataset	= None
 		self.predictionDataset: tf.data.Dataset = None
+		self.spectrogramMemoryMap = None
   
 		self.predictedSpectrogram: np.array = None
 		self.audioSegmentsToPredict: np.array = None
@@ -175,6 +176,13 @@ class DatasetHandler:
 		dictionaryUtil.saveAsNpy()
 	
 
+	def saveSpectrogramsAsMemoryMap(self):
+		dictionaryUtil = DictionaryUtil(self.spectrogramData, self.config.DICTIONAY_SAVE_PATH, 'spectrogramData.mmap')
+		dictionaryUtil.saveMemoryMap()
+
+		self.spectrogramData = None #Freeing up space
+	
+
 	def _loadSavedSpectrogramData(self):
 		dictionaryUtil = DictionaryUtil(None, self.config.DICTIONAY_SAVE_PATH, 'spectrogramData.npy')
 		self.spectrogramData = dictionaryUtil.loadFromNpy()
@@ -183,11 +191,18 @@ class DatasetHandler:
 	def _loadSavedAudioData(self):
 		dictionaryUtil = DictionaryUtil(None, self.config.DICTIONAY_SAVE_PATH, 'audioData.npy')
 		self.spectrogramData = dictionaryUtil.loadFromNpy()
+
+
+	def _loadSavedMemoryMap(self):
+		dictionaryUtil = DictionaryUtil(None, self.config.DICTIONAY_SAVE_PATH, 'spectrogramData.mmap')
+		self.spectrogramMemoryMap = dictionaryUtil.loadMemoryMap()
 	
 	
 	def convertToDataset(self):
 		if not self.spectrogramData:
 			self._loadSavedSpectrogramData()
+
+		_loadSavedMemoryMap()
 
 		self._updateShapeData()
 		outputSignature = (
@@ -214,12 +229,14 @@ class DatasetHandler:
 
 	"""
 	Outputs one training example at a time with shape: 
- 	x = [number of frequency bins, number of frames per segment, 1]
-	y = [number of frequency bins, number of frames per segment, 2]
+ 	x = [batchSize, number of frequency bins, number of frames per segment, 1]
+	y = [batchSize, number of frequency bins, number of frames per segment, 2]
 	"""
 	def datasetGenerator(self):
 		X= []
 		Y= []
+		iterate and return complete batches
+		totalBatches = len(self.spectrogramMemoryMap)
 		for trackName, trackData in self.spectrogramData.items():
 			x = np.array(trackData['mix'])
 			y = np.stack(
@@ -255,14 +272,14 @@ class DatasetHandler:
 			self.trainingDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
    
 		elif dataSetType == Constants.TEST_DATA:
-			self.testingDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
+			self.testingDataset.prefetch(buffer_size=tf.data.AUTOTUNE)
    
 		elif dataSetType == Constants.PREDICTION_DATA:
-			self.predictionDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
+			self.predictionDataset.prefetch(buffer_size=tf.data.AUTOTUNE)
    
 		else:
-			self.trainingDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
-			self.testingDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
+			self.trainingDataset.prefetch(buffer_size=tf.data.AUTOTUNE)
+			self.testingDataset.prefetch(buffer_size=tf.data.AUTOTUNE)
 
 	
 	def getDatasets(self):
@@ -279,8 +296,8 @@ class DatasetHandler:
 
 
 	def _updateShapeData(self):
-		if self.spectrogramData: 
-			self.config.NUMBER_OF_OUTPUT_CHANNELS = len(list(self.spectrogramData.values())[0])-1
+		if self.spectrogramMemoryMap: 
+			self.config.NUMBER_OF_OUTPUT_CHANNELS = len(self.spectrogramMemoryMap[0])-1
 
 		self.config.OUTPUT_SHAPE = self.config.INPUT_SHAPE[:-1] + [self.config.NUMBER_OF_OUTPUT_CHANNELS]
 
@@ -318,7 +335,7 @@ class DatasetHandler:
 				self.saveDataAsDictionary()
 			if (isForceStart or not areSavedSpectrogramsUsed) :
 				self.saveSpectrograms()
-		
+
 			self.convertToDataset()
 			self.splitDataset()
 			self.cacheDataset()
