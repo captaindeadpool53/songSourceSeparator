@@ -115,8 +115,8 @@ class PipelineHandler:
             
 
     def _initiateModel(self):
-        self.unetModel = UNET(self.config.INPUT_SHAPE, self.config.NUMBER_OF_OUTPUT_CHANNELS)
-        _ = self.unetModel(tf.ones([1]+self.config.INPUT_SHAPE))
+        self.unetModel = UNET(self.config.NUMBER_OF_OUTPUT_CHANNELS)
+        _ = self.unetModel(tf.ones(self.config.INPUT_SHAPE))
         return self.unetModel
 
 

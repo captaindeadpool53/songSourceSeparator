@@ -77,10 +77,8 @@ class UNET(Model):
 			return blockOutput
 	
 
-	def __init__(self, inputShape, outputChannels):
+	def __init__(self, outputChannels):
 		super().__init__()
-		self.inputShape = inputShape
-		self.outputShape = inputShape[:-1] + [outputChannels]
 		self.outputLayers = outputChannels
 
 		self.encoderBlock1 = UNET.EncoderBlock(32)
@@ -99,6 +97,7 @@ class UNET(Model):
 		self.finalConvLayer = layers.Conv2D(filters=self.outputLayers, kernel_size=(1,1), padding="same", activation="relu") 
 		
 		self.croppingValues: tuple
+
 
 	@tf.function
 	def call(self, input: tf.Tensor)-> tf.Tensor:
