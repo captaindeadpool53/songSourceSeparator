@@ -190,7 +190,7 @@ class DatasetHandler:
 	
 	
 	def convertToDataset(self):
-		if not self.spectrogramMemoryMap:
+		if not self.spectrogramMemoryMap.any():
 			self._loadSavedMemoryMap()
 
 		self._updateShapeData()
