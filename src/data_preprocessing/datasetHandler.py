@@ -222,7 +222,7 @@ class DatasetHandler:
 	y = [batchSize(or lower), number of frequency bins, number of frames per segment, number of output channels]
 	"""
 	def datasetGenerator(self):
-		batchSize = self.config.BATCH_SIZE.value
+		batchSize = self.config.BATCH_SIZE
 		totalBatches = (len(self.spectrogramMemoryMap)//batchSize)+1
 
 		for currentBatch in range(totalBatches):
@@ -253,7 +253,7 @@ class DatasetHandler:
 
 
 	def predictionDatasetGenerator(self):
-		batchSize = self.config.BATCH_SIZE.value
+		batchSize = self.config.BATCH_SIZE
 		totalBatches = (len(self.spectrogramsToPredict)//batchSize)+1
 		
 		for currentBatch in range(totalBatches):
