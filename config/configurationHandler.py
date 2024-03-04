@@ -1,3 +1,5 @@
+from src.utils.directoryHandler import DirectoryHandler
+
 class ConfigurationHandler :
 	def __init__(self, PROJECT_ROOT_PATH, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH,NUMBER_OF_OUTPUT_CHANNELS, BATCH_SIZE) -> None:
 		self.PROJECT_ROOT_PATH: str = PROJECT_ROOT_PATH if PROJECT_ROOT_PATH else ""
