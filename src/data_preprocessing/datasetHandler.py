@@ -330,7 +330,7 @@ class DatasetHandler:
 		if type == Constants.TRAINING_DATA:
 			if not isForceStart:
 				if self._isSavedSpectrogramDataAvailable():
-					_loadSavedMemoryMap()
+					self._loadSavedMemoryMap()
 					areSavedSpectrogramsUsed = True
 					self.totalTrainingExamples = len(self.spectrogramMemoryMap)
 
@@ -339,7 +339,7 @@ class DatasetHandler:
 					areSavedAudioUsed = True
 					self.totalTrainingExamples = len(self.audioData)
 			
-			if (isForceStart  or not self.audioData) and not areSavedSpectrogramsUsed:
+			if isForceStart or (not self.audioData and not areSavedSpectrogramsUsed):
 				self.loadAudioData()
 				self.saveDataAsDictionary()
 			if isForceStart or not areSavedSpectrogramsUsed:
