@@ -308,7 +308,7 @@ class DatasetHandler:
 
 
 	def _updateShapeData(self):
-		if self.spectrogramMemoryMap: 
+		if self.spectrogramMemoryMap.any(): 
 			self.config.NUMBER_OF_OUTPUT_CHANNELS = len(self.spectrogramMemoryMap[0])-1
 
 		self.config.OUTPUT_SHAPE = self.config.INPUT_SHAPE[:-1] + [self.config.NUMBER_OF_OUTPUT_CHANNELS]
