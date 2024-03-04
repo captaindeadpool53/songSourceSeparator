@@ -63,6 +63,7 @@ class DictionaryUtil:
 
 	def saveMemoryMap(self):
 		try:
+			print(f"::: Saving in progress for file name - {self.fileName} :::")
 			self.memoryMap = np.memmap(self.filePath, dtype='object', mode='w+', shape=(len(self.dictionary),))
 
 			#Converts the dictionary to an array of dictionary objects
@@ -70,14 +71,17 @@ class DictionaryUtil:
 				self.memoryMap[i] = self.dictionary[key]
 
 			self.memoryMap.flush()
+			print(f"::: Save complete for file name - {self.fileName} :::")
 				
 		except Exception as e:
 			print("Error in saveMemoryMap:" + str(e))
 	
 	def loadMemoryMap(self):
 		try:
+			print(f"::: Loading in progress for file name - {self.fileName} :::")
 			self.memoryMap = np.memmap(self.filePath, dtype='object', mode='c')
 
+			print(f"::: Load complete for file name - {self.fileName} :::")
 			return self.memoryMap
 				
 		except Exception as e:
