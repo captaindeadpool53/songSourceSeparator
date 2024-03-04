@@ -8,7 +8,7 @@ class Constants(Enum):
 	CHECKPOINT_PATH = 'saved_models/modelCheckpoint.h5'
 	SONG_TO_SEPERATE_DEFAULT_PATH = 'data/song_to_seperate/seperateMyTracks.wav'
 	PREDICTION_RESULT_PATH = 'results'
-	TRAINING_DATA_DEFAULT_ROOT_PATH = 'data/babyslakh_16k'
+	TRAINING_DATA_DEFAULT_ROOT_PATH = 'data/training_data'
 	
 
 	#File names

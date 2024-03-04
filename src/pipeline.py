@@ -18,15 +18,14 @@ class PipelineHandler:
         1: EvaluationHandler.drumsLossFunction1
     }
 
-    def __init__(self, datasetRootPath, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS = 2, songToPredictPath = None, modelCheckpointPath = Constants.CHECKPOINT_PATH.value, dictionarySavePath = Constants.DICTIONAY_SAVE_PATH, predictionResultPath = Constants.PREDICTION_RESULT_PATH.value):
-        self.config: ConfigurationHandler = ConfigurationHandler(datasetRootPath, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS , songToPredictPath, dictionarySavePath, predictionResultPath)
+    def __init__(self, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS = 2, PROJECT_ROOT_PATH, BATCH_SIZE):
+        self.config: ConfigurationHandler = ConfigurationHandler(PROJECT_ROOT_PATH, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, NUMBER_OF_OUTPUT_CHANNELS, BATCH_SIZE)
+
         self.datasetHandler: DatasetHandler = None 
         self.unetModel: UNET = None
         self.predictionDatasetHandler: DatasetHandler = None 
-
         self.trainingDataset: tf.data.Dataset = None
         self.testDataset: tf.data.Dataset = None
-        self.modelCheckpointPath: str = modelCheckpointPath
         self.lossFunction = None
 
 
@@ -41,7 +40,7 @@ class PipelineHandler:
     def trainModel(self, weightDecay=defaultWeightDecay, learningRate = defaultLearningRate, alpha = 0, epochs = 40):
         self.unetModel = self._initiateModel()
 
-        if os.path.exists(self.modelCheckpointPath):
+        if os.path.exists(self.config.CHECKPOINT_PATH):
            self._loadWeights()
         
         self.lossFunction = PipelineHandler.lossFunctionForAlpha[alpha]
@@ -55,7 +54,7 @@ class PipelineHandler:
         learningRateSchedulerCallback = tf.keras.callbacks.LearningRateScheduler(EvaluationHandler.learningRateScheduler)
 
         checkpointCallback = tf.keras.callbacks.ModelCheckpoint(
-            filepath=self.modelCheckpointPath,
+            filepath=self.config.CHECKPOINT_PATH,
             save_weights_only=True,
             save_best_only=True,
             monitor="val_loss",
@@ -69,17 +68,17 @@ class PipelineHandler:
             self.trainingDataset,
             validation_data = self.testDataset,
             callbacks=callbacks,
-            batch_size=Constants.BATCH_SIZE.value,
+            batch_size=self.config.BATCH_SIZE,
             epochs=epochs,
             verbose=1
         )
         print("::: Finished Training :::")
         print("::: Saving model weights :::")
-        savePath = os.path.dirname(self.modelCheckpointPath)
+        savePath = os.path.dirname(self.config.CHECKPOINT_PATH)
         if not os.path.exists(savePath):
             os.makedirs(savePath)
 
-        self.unetModel.save_weights(self.modelCheckpointPath)
+        self.unetModel.save_weights(self.config.CHECKPOINT_PATH)
         print("::: Successfully saved weights :::")
         
 
@@ -123,5 +122,5 @@ class PipelineHandler:
 
     def _loadWeights(self):
         print("::: Loading saved model weights :::") 
-        self.unetModel.load_weights(self.modelCheckpointPath)
+        self.unetModel.load_weights(self.config.CHECKPOINT_PATH)
         print("::: Sucessfuly loaded saved model weights :::") 
