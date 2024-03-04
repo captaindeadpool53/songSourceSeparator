@@ -246,8 +246,8 @@ class DatasetHandler:
 
 	def splitDataset(self):
 		self.spectrogramDataset = self.spectrogramDataset.shuffle(buffer_size= self.totalTrainingExamples)
-		self.trainingDataset = self.spectrogramDataset.take(int( 0.8*self.totalTrainingExamples)).batch(batch_size=self.config.BATCH_SIZE)
-		self.testingDataset = self.spectrogramDataset.skip(int( 0.8*self.totalTrainingExamples)).batch(batch_size=self.config.BATCH_SIZE)
+		self.trainingDataset = self.spectrogramDataset.take(int( 0.8*self.totalTrainingExamples)).batch(batch_size=self.config.BATCH_SIZE).prefetch(buffer_size=tf.data.AUTOTUNE)
+		self.testingDataset = self.spectrogramDataset.skip(int( 0.8*self.totalTrainingExamples)).batch(batch_size=self.config.BATCH_SIZE).prefetch(buffer_size=tf.data.AUTOTUNE)
 
 
 	def cacheDataset(self, dataSetType: Constants = Constants.ALL_DATA):
@@ -321,7 +321,7 @@ class DatasetHandler:
 		
 			self.convertToDataset()
 			self.splitDataset()
-			self.cacheDataset()
+			# self.cacheDataset()
 			return self.getDatasets()
 		else: 
 			self.loadPredictionData()
