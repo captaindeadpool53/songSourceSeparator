@@ -67,7 +67,7 @@ class DictionaryUtil:
 
 			#Converts the dictionary to an array of dictionary objects
 			for i, key in enumerate(self.dictionary):
-    			self.memoryMap[i] = self.dictionary[key]
+				self.memoryMap[i] = self.dictionary[key]
 
 			self.memoryMap.flush()
 				
