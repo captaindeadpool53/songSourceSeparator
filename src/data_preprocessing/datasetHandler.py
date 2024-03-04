@@ -224,62 +224,85 @@ class DatasetHandler:
 			self.predictionDatasetGenerator,
 			output_signature = outputSignature    
 		)
-		self.predictionDataset = self.predictionDataset.batch(batch_size=self.config.BATCH_SIZE)
+		self.predictionDataset = self.predictionDataset.prefetch(buffer_size = tf.data.AUTOTUNE)
 
 
 	"""
 	Outputs one training example at a time with shape: 
- 	x = [batchSize, number of frequency bins, number of frames per segment, 1]
-	y = [batchSize, number of frequency bins, number of frames per segment, 2]
+ 	x = [batchSize(or lower), number of frequency bins, number of frames per segment, 1]
+	y = [batchSize(or lower), number of frequency bins, number of frames per segment, 2]
 	"""
 	def datasetGenerator(self):
-		X= []
-		Y= []
-		iterate and return complete batches
-		totalBatches = len(self.spectrogramMemoryMap)
-		for trackName, trackData in self.spectrogramData.items():
-			x = np.array(trackData['mix'])
-			y = np.stack(
-					[np.array(trackData['drums']) , np.array(trackData['accompaniments'])],
-					-1
-				)
-			
-			if len(x.shape) == 2:
-				x = x[..., np.newaxis]
-			
-			yield(x, y)
+		batchSize = self.config.BATCH_SIZE.value
+		totalBatches = (len(self.spectrogramMemoryMap)//batchSize)+1
+
+		for currentBatch in range(totalBatches):
+			batchX= []
+			batchY= []
+			loadedBatchData = self.spectrogramMemoryMap[currentBatch*batchSize:(currentBatch+1)*batchSize]
+
+			for trackData in loadedBatchData:
+				x = np.array(trackData['mix'])
+				y = np.stack([
+					np.array(trackData['drums']), 
+					np.array(trackData['accompaniments'])
+					], -1)
+
+				if len(x.shape) == 2:
+					x = x[..., np.newaxis]
+				if len(x.shape) == 3: 		#New axis to concatenate the examples along
+					x = x[np.newaxis, ...]
+				if len(y.shape) == 3:
+					y = y[np.newaxis, ...]
+
+				batchX.append(x)
+				batchY.append(y)
+
+			batchX = np.concatenate(batchX)
+			batchY = np.concatenate(batchY)
+			yield(batchX, batchY)
 
 
 	def predictionDatasetGenerator(self):
-		X= []
-		for spectrogram in self.spectrogramsToPredict:
-			x = np.array(spectrogram)
-			
-			if len(x.shape) == 2:
-				x = x[..., np.newaxis]
-    
-			yield (x)
+		batchSize = self.config.BATCH_SIZE.value
+		totalBatches = (len(self.spectrogramsToPredict)//batchSize)+1
+		
+		for currentBatch in range(totalBatches):
+			batchX= []
+			batchData = self.spectrogramsToPredict[currentBatch*batchSize:(currentBatch+1)*batchSize]
+
+			for spectrogram in batchData:
+				x = np.array(spectrogram)
+
+				if len(x.shape) == 2:
+					x = x[..., np.newaxis]
+				if len(x.shape) == 3:
+					x = x[np.newaxis, ...]
+				batchX.append(x)
+
+			batchX = np.concatenate(batchX)
+			yield (batchX)
 			
 
 	def splitDataset(self):
 		self.spectrogramDataset = self.spectrogramDataset.shuffle(buffer_size= self.totalTrainingExamples)
-		self.trainingDataset = self.spectrogramDataset.take(int( 0.8*self.totalTrainingExamples)).batch(batch_size=self.config.BATCH_SIZE).prefetch(buffer_size=tf.data.AUTOTUNE)
-		self.testingDataset = self.spectrogramDataset.skip(int( 0.8*self.totalTrainingExamples)).batch(batch_size=self.config.BATCH_SIZE).prefetch(buffer_size=tf.data.AUTOTUNE)
+		self.trainingDataset = self.spectrogramDataset.take(int( 0.8*self.totalTrainingExamples)).prefetch(buffer_size=tf.data.AUTOTUNE)
+		self.testingDataset = self.spectrogramDataset.skip(int( 0.8*self.totalTrainingExamples)).prefetch(buffer_size=tf.data.AUTOTUNE)
 
 
 	def cacheDataset(self, dataSetType: Constants = Constants.ALL_DATA):
 		if dataSetType == Constants.TRAINING_DATA:
-			self.trainingDataset.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
+			self.trainingDataset.cache()
    
 		elif dataSetType == Constants.TEST_DATA:
-			self.testingDataset.prefetch(buffer_size=tf.data.AUTOTUNE)
+			self.testingDataset.cache()
    
 		elif dataSetType == Constants.PREDICTION_DATA:
-			self.predictionDataset.prefetch(buffer_size=tf.data.AUTOTUNE)
+			self.predictionDataset.cache()
    
 		else:
-			self.trainingDataset.prefetch(buffer_size=tf.data.AUTOTUNE)
-			self.testingDataset.prefetch(buffer_size=tf.data.AUTOTUNE)
+			self.trainingDataset.cache()
+			self.testingDataset.cache()
 
 	
 	def getDatasets(self):

@@ -70,7 +70,6 @@ class DictionaryUtil:
     			self.memoryMap[i] = self.dictionary[key]
 
 			self.memoryMap.flush()
-			self.memoryMap.close()
 				
 		except Exception as e:
 			print("Error in saveMemoryMap:" + str(e))
