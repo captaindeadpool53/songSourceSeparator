@@ -15,6 +15,7 @@ class DictionaryUtil:
   
 		if dictionary!=None:
 			self.validateDictionary()
+		self.memoryMap: np.memmap = None
 
 
 	def validateDictionary(self):
@@ -59,4 +60,27 @@ class DictionaryUtil:
 
 		except Exception as e:
 			print("Error in loadFromNpy:" + str(e))
+
+	def saveMemoryMap(self):
+		try:
+			self.memoryMap = np.memmap(self.filePath, dtype='object', mode='w+', shape=(len(self.dictionary),))
+
+			#Converts the dictionary to an array of dictionary objects
+			for i, key in enumerate(self.dictionary):
+    			self.memoryMap[i] = self.dictionary[key]
+
+			self.memoryMap.flush()
+			self.memoryMap.close()
+				
+		except Exception as e:
+			print("Error in saveMemoryMap:" + str(e))
+	
+	def loadMemoryMap(self):
+		try:
+			self.memoryMap = np.memmap(self.filePath, dtype='object', mode='c')
+
+			return self.memoryMap
+				
+		except Exception as e:
+			print("Error in loadMemoryMap:" + str(e))
 
