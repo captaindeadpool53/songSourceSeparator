@@ -4,6 +4,7 @@ from config.constants import Constants
 class ConfigurationHandler :
 	def __init__(self, PROJECT_ROOT_PATH, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH,NUMBER_OF_OUTPUT_CHANNELS, BATCH_SIZE) -> None:
 		self.PROJECT_ROOT_PATH: str = PROJECT_ROOT_PATH if PROJECT_ROOT_PATH else ""
+		self.TRAINING_DATA_ROOT: str = DirectoryHandler.joinPath(self.PROJECT_ROOT_PATH, Constants.TRAINING_DATA_DEFAULT_ROOT_PATH.value) 
 		self.SONG_TO_PREDICT_PATH: str = DirectoryHandler.joinPath(self.PROJECT_ROOT_PATH, Constants.SONG_TO_SEPERATE_DEFAULT_PATH.value) 
 		self.DICTIONAY_SAVE_PATH = DirectoryHandler.joinPath(self.PROJECT_ROOT_PATH, Constants.DICTIONAY_SAVE_PATH.value) 
 		self.PREDICTION_RESULT_PATH = DirectoryHandler.joinPath(self.PROJECT_ROOT_PATH, Constants.PREDICTION_RESULT_PATH.value) 
