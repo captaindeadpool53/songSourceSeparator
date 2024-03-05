@@ -61,7 +61,7 @@ class PipelineHandler:
             verbose=1,
         )
 
-        callbacks = [checkpointCallback, learningRateSchedulerCallback, ClearMemory()]
+        callbacks = [checkpointCallback, learningRateSchedulerCallback]
 
         print("::: Beginning training :::")
         self.unetModel.fit(
