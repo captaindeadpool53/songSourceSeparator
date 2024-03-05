@@ -208,7 +208,7 @@ class DatasetHandler:
 		)
 		
 
-	def dummy(x, y):
+	def dummy(self, x, y):
 		return x, y
   
 
