@@ -1,7 +1,7 @@
 import os
 from config.configurationHandler import ConfigurationHandler
 from src.data_preprocessing.datasetHandler import DatasetHandler
-from src.evaluation.evaluationHandler import EvaluationHandler
+from src.evaluation.evaluationHandler import EvaluationHandler, ClearMemory
 from src.model_architectures.unet import UNET
 from config.constants import Constants
 import tensorflow as tf
@@ -48,7 +48,8 @@ class PipelineHandler:
         optimizer = tf.keras.optimizers.AdamW(weight_decay=weightDecay, learning_rate=learningRate)
         self.unetModel.compile(
             loss = self.lossFunction, 
-            optimizer = optimizer
+            optimizer = optimizer,
+            run_eagerly=True
         )
 
         learningRateSchedulerCallback = tf.keras.callbacks.LearningRateScheduler(EvaluationHandler.learningRateScheduler)
@@ -61,7 +62,7 @@ class PipelineHandler:
             verbose=1,
         )
 
-        callbacks = [checkpointCallback, learningRateSchedulerCallback]
+        callbacks = [checkpointCallback, learningRateSchedulerCallback, ClearMemory()]
 
         print("::: Beginning training :::")
         self.unetModel.fit(
