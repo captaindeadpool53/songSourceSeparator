@@ -68,7 +68,6 @@ class PipelineHandler:
             self.trainingDataset,
             validation_data = self.testDataset,
             callbacks=callbacks,
-            batch_size=self.config.BATCH_SIZE,
             epochs=epochs,
             verbose=1
         )
