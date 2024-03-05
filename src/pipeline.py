@@ -70,6 +70,7 @@ class PipelineHandler:
             callbacks=callbacks,
             epochs=epochs,
             verbose=1,
+            batch_size = self.config.BATCH_SIZE
             use_multiprocessing = True
         )
         print("::: Finished Training :::")
