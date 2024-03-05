@@ -202,7 +202,7 @@ class DatasetHandler:
 			output_signature = outputSignature    
 		)
 		self.spectrogramDataset = self.spectrogramDataset.map(
-				dummy, 
+				self.dummy, 
 				num_parallel_calls=AUTOTUNE,
 				deterministic=False
 		)
