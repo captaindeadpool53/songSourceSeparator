@@ -201,6 +201,15 @@ class DatasetHandler:
 			self.datasetGenerator,
 			output_signature = outputSignature    
 		)
+		self.spectrogramDataset = self.spectrogramDataset.map(
+				dummy, 
+				num_parallel_calls=AUTOTUNE,
+				deterministic=False
+		)
+		
+
+	def dummy(x, y):
+		return x, y
   
 
 	def convertToPredictionDataset(self):
@@ -277,6 +286,8 @@ class DatasetHandler:
 			batchX = np.concatenate(batchX)
 			yield (batchX)
 			
+	
+	
 
 	def splitDataset(self):
 		totalBatches = (self.totalTrainingExamples//self.config.BATCH_SIZE)+1
