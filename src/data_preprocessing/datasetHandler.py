@@ -138,7 +138,7 @@ class DatasetHandler:
 
 				for trackType, track in trackData.items():
 					trackSpectrogram = Spectrogram.extractLogSpectrogram(track, self.config.FRAME_SIZE, self.config.HOP_LENGTH)
-					spectrogramData[str(trackName)].create_dataset(trackType, trackSpectrogram)
+					spectrogramData[str(trackName)].create_dataset(trackType, data=trackSpectrogram)
 			
 		self.audioData = None # Frees up memory, since audioData is no longer required
    
