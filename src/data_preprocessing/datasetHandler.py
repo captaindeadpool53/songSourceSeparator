@@ -203,7 +203,7 @@ class DatasetHandler:
 		)
 		self.spectrogramDataset = self.spectrogramDataset.map(
 				self.dummy, 
-				num_parallel_calls=AUTOTUNE,
+				num_parallel_calls=tf.data.AUTOTUNE,
 				deterministic=False
 		)
 		
