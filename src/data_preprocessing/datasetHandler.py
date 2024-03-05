@@ -132,6 +132,7 @@ class DatasetHandler:
 			print(":::audioData not found to convert to spectrogramData:::")
 			self._loadSavedAudioData()
 
+		print(f"::: Conversion and Saving in progress for - {Constants.SPECTROGRAM_HDF5.value} :::")
 		with h5py.File(self._generateSpectrogramFilePath(), 'w') as spectrogramData:
 			for trackName, trackData in self.audioData.items():
 				spectrogramData.create_group(str(trackName))
@@ -141,6 +142,7 @@ class DatasetHandler:
 					spectrogramData[str(trackName)].create_dataset(trackType, data=trackSpectrogram)
 			
 		self.audioData = None # Frees up memory, since audioData is no longer required
+		print(f"::: Conversion and Saving successful for - {Constants.SPECTROGRAM_HDF5.value} :::")
    
 
 	def convertToSpectrogramPredictionData(self):
