@@ -1,7 +1,7 @@
 import os
 from config.configurationHandler import ConfigurationHandler
 from src.data_preprocessing.datasetHandler import DatasetHandler
-from src.evaluation.evaluationHandler import EvaluationHandler, ClearMemory
+from src.evaluation.evaluationHandler import EvaluationHandler
 from src.model_architectures.unet import UNET
 from config.constants import Constants
 import tensorflow as tf
@@ -61,17 +61,16 @@ class PipelineHandler:
             verbose=1,
         )
 
-        callbacks = [checkpointCallback, learningRateSchedulerCallback, ClearMemory()]
+        callbacks = [checkpointCallback, learningRateSchedulerCallback]
 
         print("::: Beginning training :::")
         self.unetModel.fit(
             self.trainingDataset,
             validation_data = self.testDataset,
             callbacks=callbacks,
+            batch_size=self.config.BATCH_SIZE,
             epochs=epochs,
-            verbose=1,
-            batch_size = self.config.BATCH_SIZE,
-            use_multiprocessing = True
+            verbose=1
         )
         print("::: Finished Training :::")
         print("::: Saving model weights :::")
@@ -116,8 +115,8 @@ class PipelineHandler:
             
 
     def _initiateModel(self):
-        self.unetModel = UNET(self.config.NUMBER_OF_OUTPUT_CHANNELS)
-        _ = self.unetModel(tf.ones(self.config.INPUT_SHAPE))
+        self.unetModel = UNET(self.config.INPUT_SHAPE, self.config.NUMBER_OF_OUTPUT_CHANNELS)
+        _ = self.unetModel(tf.ones([1]+self.config.INPUT_SHAPE))
         return self.unetModel
 
 
