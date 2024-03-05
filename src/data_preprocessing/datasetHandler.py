@@ -10,6 +10,7 @@ from src.data_preprocessing.spectrogramHandler import Spectrogram
 from src.utils.dictionaryUtil import DictionaryUtil
 import tensorflow as tf
 import soundfile as sf
+import h5py
 from src.utils.directoryHandler import DirectoryHandler
 
 class DatasetHandler:
