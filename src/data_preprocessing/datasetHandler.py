@@ -192,9 +192,6 @@ class DatasetHandler:
 	
 	
 	def convertToDataset(self):
-		# if self.spectrogramMemoryMap == None:
-		# 	self._loadSavedMemoryMap()
-
 		self._updateShapeData()
 		outputSignature = (
 			tf.TensorSpec(shape=[None]+self.config.INPUT_SHAPE[1:], dtype=tf.float64),
