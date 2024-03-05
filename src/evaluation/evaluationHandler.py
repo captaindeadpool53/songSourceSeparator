@@ -1,4 +1,6 @@
 import tensorflow as tf, keras
+import gc
+from tensorflow.keras import backend as k
 
 
 class EvaluationHandler:
