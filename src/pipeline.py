@@ -69,7 +69,8 @@ class PipelineHandler:
             validation_data = self.testDataset,
             callbacks=callbacks,
             epochs=epochs,
-            verbose=1
+            verbose=1,
+            use_multiprocessing = True
         )
         print("::: Finished Training :::")
         print("::: Saving model weights :::")
