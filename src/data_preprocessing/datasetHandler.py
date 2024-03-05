@@ -176,7 +176,7 @@ class DatasetHandler:
 		dictionaryUtil = DictionaryUtil(None, self.config.DICTIONAY_SAVE_PATH, Constants.AUDIO_DATA_NPY.value)
 		self.audioData = dictionaryUtil.loadFromNpy()
 
-	
+
 	def convertToDataset(self):
 		self._updateShapeData()
 		outputSignature = (

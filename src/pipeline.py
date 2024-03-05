@@ -68,9 +68,10 @@ class PipelineHandler:
             self.trainingDataset,
             validation_data = self.testDataset,
             callbacks=callbacks,
-            batch_size=self.config.BATCH_SIZE,
             epochs=epochs,
-            verbose=1
+            verbose=1,
+            batch_size = self.config.BATCH_SIZE,
+            use_multiprocessing = True
         )
         print("::: Finished Training :::")
         print("::: Saving model weights :::")
@@ -115,8 +116,8 @@ class PipelineHandler:
             
 
     def _initiateModel(self):
-        self.unetModel = UNET(self.config.INPUT_SHAPE, self.config.NUMBER_OF_OUTPUT_CHANNELS)
-        _ = self.unetModel(tf.ones([1]+self.config.INPUT_SHAPE))
+        self.unetModel = UNET(self.config.NUMBER_OF_OUTPUT_CHANNELS)
+        _ = self.unetModel(tf.ones(self.config.INPUT_SHAPE))
         return self.unetModel
 
 
