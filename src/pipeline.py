@@ -48,8 +48,7 @@ class PipelineHandler:
         optimizer = tf.keras.optimizers.AdamW(weight_decay=weightDecay, learning_rate=learningRate)
         self.unetModel.compile(
             loss = self.lossFunction, 
-            optimizer = optimizer,
-            run_eagerly=True
+            optimizer = optimizer
         )
 
         learningRateSchedulerCallback = tf.keras.callbacks.LearningRateScheduler(EvaluationHandler.learningRateScheduler)
