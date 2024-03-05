@@ -242,7 +242,7 @@ class DatasetHandler:
 						], -1)
 
 					if len(x.shape) == 2:
-						x = x[...,trainingExampleCounter np.newaxis]
+						x = x[..., np.newaxis]
 					if len(x.shape) == 3: 		#New axis to concatenate the examples along
 						x = x[np.newaxis, ...]
 					if len(y.shape) == 3:
