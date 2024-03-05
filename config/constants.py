@@ -16,6 +16,7 @@ class Constants(Enum):
 	ACCOMPANIMENTS = 'accompaniments.wav'
 	MIX = 'mix.wav'
 	SPECTROGRAM_MEMORY_MAP = 'spectrogramData.mmap'
+	SPECTROGRAM_HDF5 = 'spectrogramData.h5'
 	AUDIO_DATA_NPY = 'audioData.npy'
 
 	#Dataset types
