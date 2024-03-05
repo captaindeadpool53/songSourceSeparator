@@ -229,7 +229,7 @@ class DatasetHandler:
 		while trainingExampleCounter <= self.totalTrainingExamples:
 			batchX= []
 			batchY= []
-			with h5py.File(self._generateSpectrogramFileName(), 'r') as savedSpectrogramFile:
+			with h5py.File(self._generateSpectrogramFilePath(), 'r') as savedSpectrogramFile:
 				for _ in range(batchSize):
 					if(trainingExampleCounter >= self.totalTrainingExamples):
 						break
@@ -326,12 +326,12 @@ class DatasetHandler:
 		self.config.NUMBER_OF_OUTPUT_CHANNELS = numberOfOutputChannels
 
 	
-	def _generateSpectrogramFileName(self):
+	def _generateSpectrogramFilePath(self):
 		return DirectoryHandler.joinPath(self.config.DICTIONAY_SAVE_PATH, Constants.SPECTROGRAM_HDF5.value)
 
 	
 	def _countTotalTrainingExamples(self):
-		with h5py.File(_generateSpectrogramFileName(), 'r') as savedSpectrogramFile:
+		with h5py.File(_generateSpectrogramFilePath(), 'r') as savedSpectrogramFile:
 			return len(list(savedSpectrogramFile.keys()))
 
 
