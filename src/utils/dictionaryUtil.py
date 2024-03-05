@@ -104,5 +104,5 @@ class DictionaryUtil:
 			print(f"::: Saving complete for file name - {self.fileName} :::")
 				
 		except Exception as e:
-			print("Error in loadMemoryMap:" + str(e))
+			print("Error in saveHDF5:" + str(e))
 	
