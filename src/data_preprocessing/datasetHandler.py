@@ -331,7 +331,7 @@ class DatasetHandler:
 
 	
 	def _countTotalTrainingExamples(self):
-		with h5py.File(_generateSpectrogramFilePath(), 'r') as savedSpectrogramFile:
+		with h5py.File(self._generateSpectrogramFilePath(), 'r') as savedSpectrogramFile:
 			return len(list(savedSpectrogramFile.keys()))
 
 
@@ -348,7 +348,7 @@ class DatasetHandler:
 				if self._isSavedSpectrogramDataAvailable():
 					# self._loadSavedMemoryMap()
 					areSavedSpectrogramsUsed = True
-					self.totalTrainingExamples = _countTotalTrainingExamples()
+					self.totalTrainingExamples = self._countTotalTrainingExamples()
 
 				if not areSavedSpectrogramsUsed and self._isSavedAudioDataAvailable():
 					self._loadSavedAudioData()
