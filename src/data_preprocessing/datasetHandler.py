@@ -234,7 +234,7 @@ class DatasetHandler:
 					if(trainingExampleCounter >= self.totalTrainingExamples):
 						break
 
-					trackData = savedSpectrogramFile[trainingExampleCounter]
+					trackData = savedSpectrogramFile[str(trainingExampleCounter)]
 
 					x = np.array(trackData['mix'])
 					y = np.stack([
