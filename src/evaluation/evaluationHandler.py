@@ -70,7 +70,8 @@ class EvaluationHandler:
        lr = 1e-4 
      return lr
 
-class ClearMemory(tf.keras.Callback):
+
+class ClearMemory(tf.keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs=None):
         gc.collect()
         k.clear_session()
