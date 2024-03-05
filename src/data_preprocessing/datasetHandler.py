@@ -61,8 +61,6 @@ class DatasetHandler:
 						}
 						self.totalTrainingExamples	+= 1
 						self.audioData[self.totalTrainingExamples] = audioFileData
-						
-
 			else:
 				break
 	
@@ -174,22 +172,10 @@ class DatasetHandler:
 		dictionaryUtil.saveAsNpy()
 
 
-	def saveSpectrogramsAsHDF5(self):
-		dictionaryUtil = DictionaryUtil(self.spectrogramData, self.config.DICTIONAY_SAVE_PATH, Constants.SPECTROGRAM_HDF5.value)
-		dictionaryUtil.saveHDF5()
-
-		self.spectrogramData = None #Freeing up space
-
-
 	def _loadSavedAudioData(self):
 		dictionaryUtil = DictionaryUtil(None, self.config.DICTIONAY_SAVE_PATH, Constants.AUDIO_DATA_NPY.value)
 		self.audioData = dictionaryUtil.loadFromNpy()
 
-
-	def _loadSavedMemoryMap(self):
-		dictionaryUtil = DictionaryUtil(None, self.config.DICTIONAY_SAVE_PATH, Constants.SPECTROGRAM_MEMORY_MAP.value)
-		self.spectrogramMemoryMap = dictionaryUtil.loadMemoryMap()
-	
 	
 	def convertToDataset(self):
 		self._updateShapeData()
