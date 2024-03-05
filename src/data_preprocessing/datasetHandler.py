@@ -224,14 +224,14 @@ class DatasetHandler:
 	"""
 	def datasetGenerator(self):
 		batchSize = self.config.BATCH_SIZE
-		trainingExampleCounter = 0
+		trainingExampleCounter = 1
 		
 		while trainingExampleCounter <= self.totalTrainingExamples:
 			batchX= []
 			batchY= []
 			with h5py.File(self._generateSpectrogramFilePath(), 'r') as savedSpectrogramFile:
 				for _ in range(batchSize):
-					if(trainingExampleCounter >= self.totalTrainingExamples):
+					if(trainingExampleCounter > self.totalTrainingExamples):
 						break
 
 					trackData = savedSpectrogramFile[str(trainingExampleCounter)]
