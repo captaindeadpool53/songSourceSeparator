@@ -276,8 +276,6 @@ class DatasetHandler:
 
 			batchX = np.concatenate(batchX)
 			yield (batchX)
-			
-	
 	
 
 	def splitDataset(self):
