@@ -96,7 +96,7 @@ class DictionaryUtil:
 			with h5py.File(self.filePath, 'w') as file:
 				
 				for trackName, trackData in self.dictionary.items():
-					trackGroup = file.create_group(trackName)
+					trackGroup = file.create_group(str(trackName))
 
 					for trackType, track in value.items():
 						trackGroup.create_dataset(trackType, data=track)
