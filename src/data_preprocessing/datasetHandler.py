@@ -173,7 +173,7 @@ class DatasetHandler:
 
 
 	def saveSpectrogramsAsHDF5(self):
-		dictionaryUtil = DictionaryUtil(self.spectrogramData, self.config.DICTIONAY_SAVE_PATH, Constants.SPECTROGRAM_MEMORY_MAP.value)
+		dictionaryUtil = DictionaryUtil(self.spectrogramData, self.config.DICTIONAY_SAVE_PATH, Constants.SPECTROGRAM_HDF5.value)
 		dictionaryUtil.saveHDF5()
 
 		self.spectrogramData = None #Freeing up space
