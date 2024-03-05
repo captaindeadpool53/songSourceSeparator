@@ -5,6 +5,9 @@ from src.evaluation.evaluationHandler import EvaluationHandler
 from src.model_architectures.unet import UNET
 from config.constants import Constants
 import tensorflow as tf
+import gc
+from tensorflow.keras import backend as k
+from tensorflow.keras.callbacks import Callback
 
 class PipelineHandler:
     defaultWeightDecay = 1e-6
@@ -61,7 +64,7 @@ class PipelineHandler:
             verbose=1,
         )
 
-        callbacks = [checkpointCallback, learningRateSchedulerCallback]
+        callbacks = [checkpointCallback, learningRateSchedulerCallback, ClearMemory()]
 
         print("::: Beginning training :::")
         self.unetModel.fit(
@@ -125,3 +128,9 @@ class PipelineHandler:
         print("::: Loading saved model weights :::") 
         self.unetModel.load_weights(self.config.CHECKPOINT_PATH)
         print("::: Sucessfuly loaded saved model weights :::") 
+
+
+class ClearMemory(Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        gc.collect()
+        k.clear_session()
