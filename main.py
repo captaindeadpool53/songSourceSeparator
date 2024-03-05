@@ -6,9 +6,9 @@ from src.pipeline import PipelineHandler
 def main(projectDataRootPath, learningRate, alpha, weightDecay, epochs, batchSize):
     pipelineHandler = PipelineHandler(
         FRAME_SIZE=2048,
-        HOP_LENGTH=512,
+        HOP_LENGTH=256,
         SEGMENT_LENGTH_IN_SECONDS=2,
-        SAMPLE_RATE=16000,
+        SAMPLE_RATE=44100,
         PROJECT_ROOT_PATH = projectDataRootPath,
         BATCH_SIZE = batchSize
     )
