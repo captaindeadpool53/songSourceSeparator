@@ -127,20 +127,19 @@ class DatasetHandler:
 		return  int(np.ceil(len(exampleTrack)/(self.config.SEGMENT_LENGTH*self.config.SAMPLE_RATE)))
 
 
-	def convertToSpectrogramData(self) -> None:
+	def convertToSpectrogramDataAndSave(self) -> None:
 		if not self.audioData:
 			print(":::audioData not found to convert to spectrogramData:::")
 			self._loadSavedAudioData()
-   
-		for trackName, trackData in self.audioData.items():
-			spectrogramData = {}
 
-			for trackType, track in trackData.items():
-				trackSpectrogram = Spectrogram.extractLogSpectrogram(track, self.config.FRAME_SIZE, self.config.HOP_LENGTH)
-				spectrogramData[trackType] = trackSpectrogram
+		with h5py.File(self._generateSpectrogramFilePath(), 'w') as spectrogramData:
+			for trackName, trackData in self.audioData.items():
+				spectrogramData.create_group(str(trackName))
 
-			self.spectrogramData[trackName] = spectrogramData
-		
+				for trackType, track in trackData.items():
+					trackSpectrogram = Spectrogram.extractLogSpectrogram(track, self.config.FRAME_SIZE, self.config.HOP_LENGTH)
+					spectrogramData[trackName].create_dataset(trackType, trackSpectrogram)
+			
 		self.audioData = None # Frees up memory, since audioData is no longer required
    
 
@@ -347,7 +346,6 @@ class DatasetHandler:
 		if type == Constants.TRAINING_DATA:
 			if not isForceStart:
 				if self._isSavedSpectrogramDataAvailable():
-					# self._loadSavedMemoryMap()
 					areSavedSpectrogramsUsed = True
 					self.totalTrainingExamples = self._countTotalTrainingExamples()
 
@@ -360,8 +358,7 @@ class DatasetHandler:
 				self.loadAudioData()
 				self.saveDataAsDictionary()
 			if isForceStart or not areSavedSpectrogramsUsed:
-				self.convertToSpectrogramData()
-				self.saveSpectrogramsAsHDF5()
+				self.convertToSpectrogramDataAndSave()
 
 			self.convertToDataset()
 			self.splitDataset()
