@@ -2,6 +2,7 @@ import os
 import json
 import numpy as np 
 import pickle
+import h5py
 
 from src.utils.directoryHandler import DirectoryHandler
 
@@ -86,4 +87,22 @@ class DictionaryUtil:
 				
 		except Exception as e:
 			print("Error in loadMemoryMap:" + str(e))
+	
 
+	def saveHDF5(self):
+		try:
+			print(f"::: Saving in progress for file name - {self.fileName} :::")
+
+			with h5py.File(self.filePath, 'w') as file:
+				
+				for trackName, trackData in self.dictionary.items():
+        			trackGroup = file.create_group(trackName)
+        			
+					for trackType, track in value.items():
+            			trackGroup.create_dataset(trackType, data=track)
+
+			print(f"::: Saving complete for file name - {self.fileName} :::")
+				
+		except Exception as e:
+			print("Error in loadMemoryMap:" + str(e))
+	

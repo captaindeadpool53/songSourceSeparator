@@ -152,7 +152,7 @@ class DatasetHandler:
 
 
 	def _isSavedSpectrogramDataAvailable(self):
-		filePath = DirectoryHandler.joinPath(self.config.DICTIONAY_SAVE_PATH, Constants.SPECTROGRAM_MEMORY_MAP.value)
+		filePath = DirectoryHandler.joinPath(self.config.DICTIONAY_SAVE_PATH, Constants.SPECTROGRAM_HDF5.value)
   
 		if os.path.exists(filePath):
 			return True
@@ -172,9 +172,9 @@ class DatasetHandler:
 		dictionaryUtil.saveAsNpy()
 
 
-	def saveSpectrogramsAsMemoryMap(self):
+	def saveSpectrogramsAsHDF5(self):
 		dictionaryUtil = DictionaryUtil(self.spectrogramData, self.config.DICTIONAY_SAVE_PATH, Constants.SPECTROGRAM_MEMORY_MAP.value)
-		dictionaryUtil.saveMemoryMap()
+		dictionaryUtil.saveHDF5()
 
 		self.spectrogramData = None #Freeing up space
 
@@ -190,8 +190,8 @@ class DatasetHandler:
 	
 	
 	def convertToDataset(self):
-		if self.spectrogramMemoryMap == None:
-			self._loadSavedMemoryMap()
+		# if self.spectrogramMemoryMap == None:
+		# 	self._loadSavedMemoryMap()
 
 		self._updateShapeData()
 		outputSignature = (
@@ -217,35 +217,41 @@ class DatasetHandler:
 
 
 	"""
-	Outputs one training example at a time with shape: 
+	Outputs a batch of training example at a time with shape: 
  	x = [batchSize(or lower), number of frequency bins, number of frames per segment, 1]
 	y = [batchSize(or lower), number of frequency bins, number of frames per segment, number of output channels]
 	"""
 	def datasetGenerator(self):
 		batchSize = self.config.BATCH_SIZE
-		totalBatches = (len(self.spectrogramMemoryMap)//batchSize)+1
-
-		for currentBatch in range(totalBatches):
+		trainingExampleCounter = 0
+		
+		while trainingExampleCounter <= self.totalTrainingExamples:
 			batchX= []
 			batchY= []
-			loadedBatchData = self.spectrogramMemoryMap[currentBatch*batchSize:(currentBatch+1)*batchSize]
+			with h5py.File(self._generateSpectrogramFileName(), 'r') as savedSpectrogramFile:
+				for _ in range(batchSize):
+					if(trainingExampleCounter >= self.totalTrainingExamples):
+						break
 
-			for trackData in loadedBatchData:
-				x = np.array(trackData['mix'])
-				y = np.stack([
-					np.array(trackData['drums']), 
-					np.array(trackData['accompaniments'])
-					], -1)
+					trackData = savedSpectrogramFile[trainingExampleCounter]
 
-				if len(x.shape) == 2:
-					x = x[..., np.newaxis]
-				if len(x.shape) == 3: 		#New axis to concatenate the examples along
-					x = x[np.newaxis, ...]
-				if len(y.shape) == 3:
-					y = y[np.newaxis, ...]
+					x = np.array(trackData['mix'])
+					y = np.stack([
+						np.array(trackData['drums']), 
+						np.array(trackData['accompaniments'])
+						], -1)
 
-				batchX.append(x)
-				batchY.append(y)
+					if len(x.shape) == 2:
+						x = x[...,trainingExampleCounter np.newaxis]
+					if len(x.shape) == 3: 		#New axis to concatenate the examples along
+						x = x[np.newaxis, ...]
+					if len(y.shape) == 3:
+						y = y[np.newaxis, ...]
+
+					batchX.append(x)
+					batchY.append(y)
+
+					trainingExampleCounter+=1
 
 			batchX = np.concatenate(batchX)
 			batchY = np.concatenate(batchY)
@@ -319,6 +325,15 @@ class DatasetHandler:
 		self.config.NUMBER_OF_OUTPUT_CHANNELS = numberOfOutputChannels
 
 	
+	def _generateSpectrogramFileName(self):
+		return DirectoryHandler.joinPath(self.config.DICTIONAY_SAVE_PATH, Constants.SPECTROGRAM_HDF5.value)
+
+	
+	def _countTotalTrainingExamples(self):
+		with h5py.File(_generateSpectrogramFileName(), 'r') as savedSpectrogramFile:
+			return len(list(savedSpectrogramFile.keys()))
+
+
 	"""
  	Loading data from scratch only if it is passed as an argument isForceStart or if pre-saved files are not found.
 	If saved data is found, it loads the saved data and skips on preprocessing and saving it.
@@ -330,9 +345,9 @@ class DatasetHandler:
 		if type == Constants.TRAINING_DATA:
 			if not isForceStart:
 				if self._isSavedSpectrogramDataAvailable():
-					self._loadSavedMemoryMap()
+					# self._loadSavedMemoryMap()
 					areSavedSpectrogramsUsed = True
-					self.totalTrainingExamples = len(self.spectrogramMemoryMap)
+					self.totalTrainingExamples = _countTotalTrainingExamples()
 
 				if not areSavedSpectrogramsUsed and self._isSavedAudioDataAvailable():
 					self._loadSavedAudioData()
@@ -344,7 +359,7 @@ class DatasetHandler:
 				self.saveDataAsDictionary()
 			if isForceStart or not areSavedSpectrogramsUsed:
 				self.convertToSpectrogramData()
-				self.saveSpectrogramsAsMemoryMap()
+				self.saveSpectrogramsAsHDF5()
 
 			self.convertToDataset()
 			self.splitDataset()
