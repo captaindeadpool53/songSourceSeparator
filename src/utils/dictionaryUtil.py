@@ -55,7 +55,7 @@ class DictionaryUtil:
 			print(f"::: Loading in progress for file name - {self.fileName} :::")
 			
 			self.dictionary = np.load(self.filePath, allow_pickle=True).item()
-   
+
 			print(f"::: Load complete for file name - {self.fileName} :::")
 			return self.dictionary
 
@@ -96,10 +96,10 @@ class DictionaryUtil:
 			with h5py.File(self.filePath, 'w') as file:
 				
 				for trackName, trackData in self.dictionary.items():
-        			trackGroup = file.create_group(trackName)
-        			
+					trackGroup = file.create_group(trackName)
+
 					for trackType, track in value.items():
-            			trackGroup.create_dataset(trackType, data=track)
+						trackGroup.create_dataset(trackType, data=track)
 
 			print(f"::: Saving complete for file name - {self.fileName} :::")
 				
