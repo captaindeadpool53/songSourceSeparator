@@ -196,8 +196,8 @@ class DatasetHandler:
 
 		self._updateShapeData()
 		outputSignature = (
-			tf.TensorSpec(shape=self.config.INPUT_SHAPE, dtype=tf.float64),
-			tf.TensorSpec(shape=self.config.OUTPUT_SHAPE, dtype=tf.float64)
+			tf.TensorSpec(shape=[None]+self.config.INPUT_SHAPE[1:], dtype=tf.float64),
+			tf.TensorSpec(shape=[None]+self.config.OUTPUT_SHAPE[1:], dtype=tf.float64)
 		)
 		self.spectrogramDataset = tf.data.Dataset.from_generator(
 			self.datasetGenerator,
@@ -208,7 +208,7 @@ class DatasetHandler:
 	def convertToPredictionDataset(self):
 		self._updateShapeData()
 		outputSignature = (
-			tf.TensorSpec(shape=self.config.INPUT_SHAPE, dtype=tf.float64)
+			tf.TensorSpec(shape=[None]+self.config.INPUT_SHAPE[1:], dtype=tf.float64)
 		)
 		self.predictionDataset = tf.data.Dataset.from_generator(
 			self.predictionDatasetGenerator,
