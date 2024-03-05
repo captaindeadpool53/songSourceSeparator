@@ -77,7 +77,7 @@ class DatasetHandler:
 		segments = self._segmentAudioFiles(mixTrack)
 
 		self.audioSegmentsToPredict = np.squeeze(segments) # shape = (numberOfPossibleSegments, samplesPerSegment)
-		self.totalTrainingExamples = self.audioSegmentsToPredict[0]	
+		self.totalTrainingExamples = self.audioSegmentsToPredict.shape[0]	
 
 
 	"""
