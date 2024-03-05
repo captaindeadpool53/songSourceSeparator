@@ -98,7 +98,7 @@ class DictionaryUtil:
 				for trackName, trackData in self.dictionary.items():
 					trackGroup = file.create_group(str(trackName))
 
-					for trackType, track in value.items():
+					for trackType, track in trackData.items():
 						trackGroup.create_dataset(trackType, data=track)
 
 			print(f"::: Saving complete for file name - {self.fileName} :::")
