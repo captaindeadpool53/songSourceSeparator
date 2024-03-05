@@ -201,15 +201,6 @@ class DatasetHandler:
 			self.datasetGenerator,
 			output_signature = outputSignature    
 		)
-		self.spectrogramDataset = self.spectrogramDataset.map(
-				self.dummy, 
-				num_parallel_calls=tf.data.AUTOTUNE,
-				deterministic=False
-		)
-		
-
-	def dummy(self, x, y):
-		return x, y
   
 
 	def convertToPredictionDataset(self):
