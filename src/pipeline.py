@@ -18,6 +18,7 @@ class PipelineHandler:
         0.5: EvaluationHandler.drumsLossFunction5,
         0.1: EvaluationHandler.drumsLossFunction01,
         0.2: EvaluationHandler.drumsLossFunction2,
+        0.79: EvaluationHandler.drumsLossFunction79
         1: EvaluationHandler.drumsLossFunction1
     }
 
