@@ -7,7 +7,7 @@ def main(projectDataRootPath, learningRate, alpha, weightDecay, epochs, batchSiz
     pipelineHandler = PipelineHandler(
         FRAME_SIZE=2048,
         HOP_LENGTH=256,
-        SEGMENT_LENGTH_IN_SECONDS=1.5,
+        SEGMENT_LENGTH_IN_SECONDS=4,
         SAMPLE_RATE=44100,  # Using low sample rate due to computational constraints.
         PROJECT_ROOT_PATH = projectDataRootPath,
         BATCH_SIZE = batchSize
