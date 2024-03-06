@@ -245,20 +245,24 @@ class DatasetHandler:
 
 	def predictionDatasetGenerator(self):
 		batchSize = self.config.BATCH_SIZE
-		totalBatches = (len(self.spectrogramsToPredict)//batchSize)+1
+		trainingExampleCounter = 1
 		
-		for currentBatch in range(totalBatches):
+		while trainingExampleCounter <= len(self.spectrogramsToPredict):
 			batchX= []
-			batchData = self.spectrogramsToPredict[currentBatch*batchSize:(currentBatch+1)*batchSize]
-
-			for spectrogram in batchData:
+			for _ in range(batchSize):
+				if(trainingExampleCounter > len(self.spectrogramsToPredict)):
+						break
+				spectrogram = self.spectrogramsToPredict[trainingExampleCounter-1]
 				x = np.array(spectrogram)
 
 				if len(x.shape) == 2:
 					x = x[..., np.newaxis]
 				if len(x.shape) == 3:
 					x = x[np.newaxis, ...]
+
 				batchX.append(x)
+
+				trainingExampleCounter+=1
 
 			batchX = np.concatenate(batchX)
 			yield (batchX)
