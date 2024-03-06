@@ -5,7 +5,7 @@ The output layers need to be tuned according to the data the model is being trai
 
 The model used is a CNN U-NET based on this research paper - https://arxiv.org/pdf/1810.11520.pdf .
 
-Some architectural choices are inspired from this repository - https://github.com/mohammadreza490/music-source-separation-using-Unets. 
+Some architectural choices are inspired from this repository - https://github.com/mohammadreza490/music-source-separation-using-Unets. Shout out to mohammadreza490, since it was a big help in the making of this project!
 
 # General flow
 The steps taken are as follows:
@@ -25,3 +25,8 @@ All this is encapsulated inside the PipelineHandler class, and we only need to c
 
 # Generating the Dataset
 We will use the SLAKH dataset (http://www.slakh.com) and its utility repository (https://github.com/ethman/slakh-utils/tree/master?tab=readme-ov-file#readme) to generate the audio tracks as required by the usecase.
+
+
+Examples of seperated tracks, trained model weights, and other files used in this project can be found here: https://drive.google.com/drive/folders/1a2OcKI8fIIyNQirv2pj0-uCaBWbEourR?usp=sharing
+
+
