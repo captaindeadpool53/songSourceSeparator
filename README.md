@@ -18,7 +18,7 @@ The steps taken are as follows:
 7. Creating a Tensorflow Dataset which loads a batch of track spectrograms from the HDF5 file, so that only the required data is loaded into the RAM.
 8. Train the U-NET on the image data with the original song segment's spectrogram as input, and seperated tracks' spectrograms (drums and accompaniments tracks for example) stacked on each other as expected prediction.
 9. Doing the same preprocessing for the track we need to predict, expect we dont need to save it in a HDF5 file, because it is considerably inexpensive in terms of memory as compared to the dataset.
-10. Making a prediction through the U-NET and postprocessing the output tracks, which includes joining the segments, converting the spectrograms to audio format through ISTFT (Inverse Short-Time Fourier Transform), and adding back the lost phase information during the initial STFT.
+10. Making a prediction through the U-NET and postprocessing the output tracks, which includes joining the segments, adding back the lost phase information during the initial STFT, and converting the spectrograms to audio format through ISTFT (Inverse Short-Time Fourier Transform).
 11. Saving the output tracks as a .wav file.
 
 All this is encapsulated inside the PipelineHandler class, and we only need to call the high level functions. Or we can just run the main.py file with the required parameters, and all this will be taken care of.
