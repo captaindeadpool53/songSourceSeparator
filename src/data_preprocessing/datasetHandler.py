@@ -12,6 +12,7 @@ import tensorflow as tf
 import soundfile as sf
 import h5py
 from src.utils.directoryHandler import DirectoryHandler
+import random
 
 class DatasetHandler:
 	def __init__(self, config :ConfigurationHandler) -> None:
@@ -345,6 +346,7 @@ class DatasetHandler:
 			
 			if isForceStart or (not self.audioData and not areSavedSpectrogramsUsed):
 				self.loadAudioData()
+				self.audioData = self.shuffleValues(self.audioData)
 				self.saveDataAsDictionary()
 			if isForceStart or not areSavedSpectrogramsUsed:
 				self.convertToSpectrogramDataAndSave()
@@ -379,7 +381,17 @@ class DatasetHandler:
    
 			trackPath = DirectoryHandler.joinPath(self.config.PREDICTION_RESULT_PATH, "Track" + str(trackTypeIndex) + ".wav")
 			sf.write(trackPath, finalPrediction, self.config.SAMPLE_RATE)
-			
+
+
+	def shuffleValues(self, dictionary):
+		values = list(dictionary.values())
+		random.shuffle(values)
+		index= 0
+		for key in dictionary.keys():
+			dictionary [key] = values[index]
+			index+=1
+		return dictionary 
+	
   
 	def visualiseSpectrogram(self, spectrogram: np.array):
 		plt.figure(figsize=(15, 10))
