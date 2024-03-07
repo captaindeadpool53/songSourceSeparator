@@ -24,9 +24,15 @@ The steps taken are as follows:
 All this is encapsulated inside the PipelineHandler class, and we only need to call the high level functions. Or we can just run the main.py file with the required parameters, and all this will be taken care of.
 
 # Generating the Dataset
-We will use the SLAKH dataset (http://www.slakh.com) and its utility repository (https://github.com/ethman/slakh-utils/tree/master?tab=readme-ov-file#readme) to generate the audio tracks as required by the usecase.
+A part of the SLAKH dataset (http://www.slakh.com) was used to train this model. And its utility repository (https://github.com/ethman/slakh-utils/tree/master?tab=readme-ov-file#readme) was used to generate the audio tracks as required by the usecase.
 
+# How to use the trained model?
+1. Copy the google colab notebook which can found in the 'notebooks' folder.
+2. Mount your google drive and clone the repository in the google colab environment (included in the notebook).
+3. You'll need to have the same folder structure in the drive as I've made in the project(or in the drive link below). Then just pass the path to this root folder to the PipelineHandler class, as can be seen in the notebook.
+4. Put the pretrained model weights into the 'saved_models' folder with the name 'modelCheckpoint.h5', and the song you want to seperate in 'data/song_to_seperate' with name 'seperateMyTracks.wav'.
+5. Then run the cell which is used for predicting results in the notebook.
+6. The results will be saved in 'results' folder.
 
 Examples of seperated tracks, trained model weights, and other files used in this project can be found here: https://drive.google.com/drive/folders/1a2OcKI8fIIyNQirv2pj0-uCaBWbEourR?usp=sharing
-
 
