@@ -1,9 +1,9 @@
 # songSourceSeperator
-This project's purpose is to take a song with multiple instruments as input and split it into its consitituent instrument tracks. So the output can be either of the constituent tracks of the song or any mixture of combination of them.
+This project's purpose is to take a song with multiple instruments as input and split it into its consitituent instrument tracks using machine learning. So the output can be either of the constituent tracks of the song or any mixture of combination of them.
 
 The output layers need to be tuned according to the data the model is being trained on. For example, if we only want the drums and accompaniments( mixture of every other track) tracks as the output, we will need to generate that data first, and then adjust the output layers of the model accordingly to generate two tracks of the same size as the input.
 
-The model used is a CNN U-NET based on this research paper - https://arxiv.org/pdf/1810.11520.pdf .
+The model used is a CNN U-Net based on this research paper - https://arxiv.org/pdf/1810.11520.pdf .
 
 Some architectural choices are inspired from this repository - https://github.com/mohammadreza490/music-source-separation-using-Unets. Shout out to mohammadreza490, since it was a big help in the making of this project!
 
@@ -16,7 +16,7 @@ The steps taken are as follows:
 5. Convert the data from audio format (time domain) to image format (time-frequency domain) which can be processed by our CNN. We will use STFT (Short-Time Fourier Transform) to convert the audio to a spectrogram which is a representation of the track in time-frequency domain.
 6. Simultaneously saving these spectrograms as dictionary in HDF5 format on disk while generating them, so that it doesn't take up RAM memory.
 7. Creating a Tensorflow Dataset which loads a batch of track spectrograms from the HDF5 file, so that only the required data is loaded into the RAM.
-8. Train the U-NET on the image data with the original song segment's spectrogram as input, and seperated tracks' spectrograms (drums and accompaniments tracks for example) stacked on each other as expected prediction.
+8. Train the U-Net on the image data with the original song segment's spectrogram as input, and seperated tracks' spectrograms (drums and accompaniments tracks for example) stacked on each other as expected prediction.
 9. Doing the same preprocessing for the track we need to predict, expect we dont need to save it in a HDF5 file, because it is considerably inexpensive in terms of memory as compared to the dataset.
 10. Making a prediction through the U-NET and postprocessing the output tracks, which includes joining the segments, adding back the lost phase information during the initial STFT, and converting the spectrograms to audio format through ISTFT (Inverse Short-Time Fourier Transform).
 11. Saving the output tracks as a .wav file.
