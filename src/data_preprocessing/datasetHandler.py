@@ -271,7 +271,7 @@ class DatasetHandler:
 
 	def splitDataset(self):
 		totalBatches = (self.totalTrainingExamples//self.config.BATCH_SIZE)+1
-		self.spectrogramDataset = self.spectrogramDataset.shuffle(buffer_size= 32)
+		# self.spectrogramDataset = self.spectrogramDataset.shuffle(buffer_size= 32)
 		self.trainingDataset = self.spectrogramDataset.take(int( 0.8*totalBatches)).prefetch(buffer_size=tf.data.AUTOTUNE)
 		self.testingDataset = self.spectrogramDataset.skip(int( 0.8*totalBatches)).prefetch(buffer_size=tf.data.AUTOTUNE)
 
