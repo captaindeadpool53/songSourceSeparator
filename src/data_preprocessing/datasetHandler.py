@@ -154,7 +154,7 @@ class DatasetHandler:
 			print(":::audioData not found to convert to spectrogramData:::")
 			return
 		
-		with h5py.File(self._generateSpectrogramFilePath(), 'w') as spectrogramData:
+		with h5py.File(self._generateSpectrogramFilePath(), 'a') as spectrogramData:
 			for trackName, trackData in self.audioData.items():
 				trackName = "track" + str(trackName)
 				spectrogramData.create_group(str(trackName))
