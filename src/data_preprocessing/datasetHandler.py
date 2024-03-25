@@ -33,22 +33,28 @@ class DatasetHandler:
 		
 
 	"""
-	Loads all the training examples in the form of wav audio files from the root path.
-	Preprocesses them by segmenting and padding.
-	Converts the segments into spectrograms.
-	Saves the spectrograms in HDF5 format, one song at a time.
+	Loads all the training examples in the form of wav audio files from the root path
 	"""
-	def generateTrainingData(self) -> None:
+	def loadAudioData(self) -> None:
 		self.totalTrainingExamples = 0
 		for root, folders, files in os.walk(self.config.TRAINING_DATA_ROOT):
 			if root == self.config.TRAINING_DATA_ROOT:
 				for folder in folders:
-					print(f"::: Loading {folder} :::")
-					exampleTrack = self._loadTracks(root, folder)
-					print(f"::: Loading complete for {folder} :::")
+					print("::: Loading "+folder+" :::")
+					targetFolderPath = DirectoryHandler.joinPath(root, folder)
+					targetFilesPath = DirectoryHandler.joinPath(targetFolderPath, Constants.TRAINING_DATA_RELATIVE_PATH_DRUMS.value)
+					
+					mixTrackPath = DirectoryHandler.joinPath(targetFolderPath,Constants.MIX.value) 
+					drumsTrackPath = DirectoryHandler.joinPath(targetFilesPath, Constants.DRUMS.value)
+					accompanimentsTrackPath = DirectoryHandler.joinPath(targetFilesPath, Constants.ACCOMPANIMENTS.value)
+     
+					mixTrack = AudioLoader.loadAudioFile( mixTrackPath , self.config.SAMPLE_RATE)
+					drumsTrack = AudioLoader.loadAudioFile(drumsTrackPath , self.config.SAMPLE_RATE)
+					accompanimentsTrack =  AudioLoader.loadAudioFile(accompanimentsTrackPath, self.config.SAMPLE_RATE)
+					
+					exampleTrack = np.stack([mixTrack, drumsTrack, accompanimentsTrack])
 					segments = self._segmentAudioFiles(exampleTrack)
 
-					self.audioData = {}
 					for segment in segments:
 						audioFileData = {
 							"mix": segment[0],
@@ -57,27 +63,10 @@ class DatasetHandler:
 						}
 						self.totalTrainingExamples	+= 1
 						self.audioData[self.totalTrainingExamples] = audioFileData
-            
-					print(f"::: Conversion and Saving in progress for {folder} in {Constants.SPECTROGRAM_HDF5.value} :::")
-					self.convertToSpectrogramDataAndSave()
-					print(f"::: Conversion and Saving successful for {folder} in {Constants.SPECTROGRAM_HDF5.value} :::")
+      
+					print("::: Loading complete for "+folder+" :::")
 			else:
 				break
-
-	def _loadTracks(self, root, folder):
-		targetFolderPath = DirectoryHandler.joinPath(root, folder)
-		targetFilesPath = DirectoryHandler.joinPath(targetFolderPath, Constants.TRAINING_DATA_RELATIVE_PATH_DRUMS.value)	
-					
-		mixTrackPath = DirectoryHandler.joinPath(targetFolderPath,Constants.MIX.value) 
-		drumsTrackPath = DirectoryHandler.joinPath(targetFilesPath, Constants.DRUMS.value)
-		accompanimentsTrackPath = DirectoryHandler.joinPath(targetFilesPath, Constants.ACCOMPANIMENTS.value)
-
-		mixTrack = AudioLoader.loadAudioFile( mixTrackPath , self.config.SAMPLE_RATE)
-		drumsTrack = AudioLoader.loadAudioFile(drumsTrackPath , self.config.SAMPLE_RATE)
-		accompanimentsTrack =  AudioLoader.loadAudioFile(accompanimentsTrackPath, self.config.SAMPLE_RATE)
-
-		exampleTrack = np.stack([mixTrack, drumsTrack, accompanimentsTrack])
-		return exampleTrack
 	
  
 	"""
@@ -143,18 +132,19 @@ class DatasetHandler:
 	def convertToSpectrogramDataAndSave(self) -> None:
 		if not self.audioData:
 			print(":::audioData not found to convert to spectrogramData:::")
-			return
-		
+			self._loadSavedAudioData()
+
+		print(f"::: Conversion and Saving in progress for - {Constants.SPECTROGRAM_HDF5.value} :::")
 		with h5py.File(self._generateSpectrogramFilePath(), 'w') as spectrogramData:
 			for trackName, trackData in self.audioData.items():
-				trackName = "track" + trackName
 				spectrogramData.create_group(str(trackName))
 
 				for trackType, track in trackData.items():
 					trackSpectrogram = Spectrogram.extractLogSpectrogram(track, self.config.FRAME_SIZE, self.config.HOP_LENGTH)
 					spectrogramData[str(trackName)].create_dataset(trackType, data=trackSpectrogram)
 			
-		self.audioData = {} # Frees up memory, since audioData is no longer required to be in memory
+		self.audioData = None # Frees up memory, since audioData is no longer required
+		print(f"::: Conversion and Saving successful for - {Constants.SPECTROGRAM_HDF5.value} :::")
    
 
 	def convertToSpectrogramPredictionData(self):
@@ -343,6 +333,7 @@ class DatasetHandler:
 	If saved data is found, it loads the saved data and skips on preprocessing and saving it.
   	"""
 	def loadAndPreprocessData(self, isForceStart: bool = False, type: Constants = Constants.TRAINING_DATA):
+		areSavedAudioUsed = False
 		areSavedSpectrogramsUsed = False
 	
 		if type == Constants.TRAINING_DATA:
@@ -350,10 +341,18 @@ class DatasetHandler:
 				if self._isSavedSpectrogramDataAvailable():
 					areSavedSpectrogramsUsed = True
 					self.totalTrainingExamples = self._countTotalTrainingExamples()
+
+				if not areSavedSpectrogramsUsed and self._isSavedAudioDataAvailable():
+					self._loadSavedAudioData()
+					areSavedAudioUsed = True
+					self.totalTrainingExamples = len(self.audioData)
 			
+			if isForceStart or (not self.audioData and not areSavedSpectrogramsUsed):
+				self.loadAudioData()
+				self.audioData = self.shuffleValues(self.audioData)
+				self.saveDataAsDictionary()
 			if isForceStart or not areSavedSpectrogramsUsed:
-				self.generateTrainingData()
-				self.shuffleHDF5Dataset()
+				self.convertToSpectrogramDataAndSave()
 
 			self.convertToDataset()
 			self.splitDataset()
@@ -387,17 +386,14 @@ class DatasetHandler:
 			sf.write(trackPath, finalPrediction, self.config.SAMPLE_RATE)
 
 
-	"""
- 	Shuffles the values assigned to the keys in the saved spectrogram file.
-	Also changes the name of the tracks from 'tracki' to 'i', where i is an integer.
- 	"""
-	def shuffleHDF5Dataset(self):
-		with h5py.File(self._generateSpectrogramFilePath, 'r+') as savedSpectrogramFile:
-			trackNames = list(savedSpectrogramFile.keys())
-			random.shuffle(trackNames)
-			
-			for trackNumber, trackName in enumerate(trackNames):
-				savedSpectrogramFile.move(trackName, '/', name=str(trackNumber))
+	def shuffleValues(self, dictionary):
+		values = list(dictionary.values())
+		random.shuffle(values)
+		index= 0
+		for key in dictionary.keys():
+			dictionary [key] = values[index]
+			index+=1
+		return dictionary 
 	
   
 	def visualiseSpectrogram(self, spectrogram: np.array):
