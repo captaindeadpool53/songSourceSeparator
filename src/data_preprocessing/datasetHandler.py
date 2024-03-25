@@ -47,7 +47,7 @@ class DatasetHandler:
 					print(f"::: Loading {folder} :::")
 					exampleTrack = self._loadTracks(root, folder)
      
-					if exampleTrack == None:
+					if len(exampleTrack) == 0:
 						print(f":::Track file(s) don't exist. Skipping {folder}:::")
 						continue
   
@@ -80,7 +80,7 @@ class DatasetHandler:
 
 		for path in [mixTrackPath, drumsTrackPath, accompanimentsTrackPath]:
 			if not os.path.exists(path):
-				return None
+				return []
 
 		mixTrack = AudioLoader.loadAudioFile( mixTrackPath , self.config.SAMPLE_RATE)
 		drumsTrack = AudioLoader.loadAudioFile(drumsTrackPath , self.config.SAMPLE_RATE)
