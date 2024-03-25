@@ -47,7 +47,7 @@ class DatasetHandler:
 					print(f"::: Loading {folder} :::")
 					exampleTrack = self._loadTracks(root, folder)
      
-					if not exampleTrack:
+					if exampleTrack == None:
 						print(f":::Track file(s) don't exist. Skipping {folder}:::")
 						continue
   
