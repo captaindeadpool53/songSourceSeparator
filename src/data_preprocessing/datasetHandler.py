@@ -147,7 +147,7 @@ class DatasetHandler:
 		
 		with h5py.File(self._generateSpectrogramFilePath(), 'w') as spectrogramData:
 			for trackName, trackData in self.audioData.items():
-				trackName = "track" + trackName
+				trackName = "track" + str(trackName)
 				spectrogramData.create_group(str(trackName))
 
 				for trackType, track in trackData.items():
