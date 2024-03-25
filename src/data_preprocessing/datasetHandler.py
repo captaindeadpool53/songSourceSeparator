@@ -42,6 +42,7 @@ class DatasetHandler:
 		self.totalTrainingExamples = 0
 		for root, folders, files in os.walk(self.config.TRAINING_DATA_ROOT):
 			if root == self.config.TRAINING_DATA_ROOT:
+				folders.sort()
 				for folder in folders:
 					print(f"::: Loading {folder} :::")
 					exampleTrack = self._loadTracks(root, folder)
@@ -154,7 +155,7 @@ class DatasetHandler:
 			print(":::audioData not found to convert to spectrogramData:::")
 			return
 		
-		with h5py.File(self._generateSpectrogramFilePath(), 'w') as spectrogramData:
+		with h5py.File(self._generateSpectrogramFilePath(), 'a') as spectrogramData:
 			for trackName, trackData in self.audioData.items():
 				trackName = "track" + str(trackName)
 				spectrogramData.create_group(str(trackName))
