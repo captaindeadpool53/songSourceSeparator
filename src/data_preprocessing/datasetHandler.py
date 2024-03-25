@@ -42,7 +42,7 @@ class DatasetHandler:
 		self.totalTrainingExamples = 0
 		for root, folders, files in os.walk(self.config.TRAINING_DATA_ROOT):
 			if root == self.config.TRAINING_DATA_ROOT:
-				folders = self._skipToLastTrack(folders)
+				folders.sort()
 				for folder in folders:
 					print(f"::: Loading {folder} :::")
 					exampleTrack = self._loadTracks(root, folder)
@@ -199,15 +199,6 @@ class DatasetHandler:
 	def _loadSavedAudioData(self):
 		dictionaryUtil = DictionaryUtil(None, self.config.DICTIONAY_SAVE_PATH, Constants.AUDIO_DATA_NPY.value)
 		self.audioData = dictionaryUtil.loadFromNpy()
-  
-	
-	def _skipToLastTrack(self, folders):
-		folders.sort()
-		with h5py.File(self._generateSpectrogramFilePath(), 'a') as savedSpectrogramFile:
-			tracksInFile = len(savedSpectrogramFile.keys())
-			if len(folders) > tracksInFile:
-				folders = folders[tracksInFile:]
-		return folders
 
 
 	def convertToDataset(self):
