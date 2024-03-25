@@ -42,6 +42,7 @@ class DatasetHandler:
 		self.totalTrainingExamples = 0
 		for root, folders, files in os.walk(self.config.TRAINING_DATA_ROOT):
 			if root == self.config.TRAINING_DATA_ROOT:
+				folders.sort()
 				for folder in folders:
 					print(f"::: Loading {folder} :::")
 					exampleTrack = self._loadTracks(root, folder)
