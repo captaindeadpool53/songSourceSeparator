@@ -45,6 +45,11 @@ class DatasetHandler:
 				for folder in folders:
 					print(f"::: Loading {folder} :::")
 					exampleTrack = self._loadTracks(root, folder)
+     
+					if not exampleTrack:
+						print(f":::Track file(s) don't exist. Skipping {folder}:::")
+						continue
+  
 					print(f"::: Loading complete for {folder} :::")
 					segments = self._segmentAudioFiles(exampleTrack)
 
@@ -71,6 +76,10 @@ class DatasetHandler:
 		mixTrackPath = DirectoryHandler.joinPath(targetFolderPath,Constants.MIX.value) 
 		drumsTrackPath = DirectoryHandler.joinPath(targetFilesPath, Constants.DRUMS.value)
 		accompanimentsTrackPath = DirectoryHandler.joinPath(targetFilesPath, Constants.ACCOMPANIMENTS.value)
+
+		for path in [mixTrackPath, drumsTrackPath, accompanimentsTrackPath]:
+			if not os.path.exists(path):
+				return None
 
 		mixTrack = AudioLoader.loadAudioFile( mixTrackPath , self.config.SAMPLE_RATE)
 		drumsTrack = AudioLoader.loadAudioFile(drumsTrackPath , self.config.SAMPLE_RATE)
