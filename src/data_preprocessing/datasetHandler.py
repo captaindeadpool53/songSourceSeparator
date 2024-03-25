@@ -40,6 +40,7 @@ class DatasetHandler:
 		for root, folders, files in os.walk(self.config.TRAINING_DATA_ROOT):
 			if root == self.config.TRAINING_DATA_ROOT:
 				for folder in folders:
+					print("::: Loading "+folder+" :::")
 					targetFolderPath = DirectoryHandler.joinPath(root, folder)
 					targetFilesPath = DirectoryHandler.joinPath(targetFolderPath, Constants.TRAINING_DATA_RELATIVE_PATH_DRUMS.value)
 					
@@ -62,6 +63,8 @@ class DatasetHandler:
 						}
 						self.totalTrainingExamples	+= 1
 						self.audioData[self.totalTrainingExamples] = audioFileData
+      
+					print("::: Loading complete for "+folder+" :::")
 			else:
 				break
 	
