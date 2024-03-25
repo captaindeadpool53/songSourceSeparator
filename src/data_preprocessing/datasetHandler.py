@@ -45,7 +45,6 @@ class DatasetHandler:
 				for folder in folders:
 					print(f"::: Loading {folder} :::")
 					exampleTrack = self._loadTracks(root, folder)
-     
 					print(f"::: Loading complete for {folder} :::")
 					segments = self._segmentAudioFiles(exampleTrack)
 
@@ -58,12 +57,10 @@ class DatasetHandler:
 						}
 						self.totalTrainingExamples	+= 1
 						self.audioData[self.totalTrainingExamples] = audioFileData
+            
 					print(f"::: Conversion and Saving in progress for {folder} in {Constants.SPECTROGRAM_HDF5.value} :::")
-     
 					self.convertToSpectrogramDataAndSave()
-     
 					print(f"::: Conversion and Saving successful for {folder} in {Constants.SPECTROGRAM_HDF5.value} :::")
-					
 			else:
 				break
 
