@@ -402,7 +402,7 @@ class DatasetHandler:
 	Also changes the name of the tracks from 'tracki' to 'i', where i is an integer.
  	"""
 	def shuffleHDF5Dataset(self):
-		with h5py.File(self._generateSpectrogramFilePath, 'r+') as savedSpectrogramFile:
+		with h5py.File(self._generateSpectrogramFilePath(), 'r+') as savedSpectrogramFile:
 			trackNames = list(savedSpectrogramFile.keys())
 			random.shuffle(trackNames)
 			
