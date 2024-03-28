@@ -38,12 +38,15 @@ class DatasetHandler:
 	Converts the segments into spectrograms.
 	Saves the spectrograms in HDF5 format, one song at a time.
 	"""
-	def generateTrainingData(self, continueFromIndex = 0) -> None:
+	def generateTrainingData(self, stoppingCondition = None, continueFromIndex = 0) -> None:
 		self.totalTrainingExamples = continueFromIndex
 		for root, folders, files in os.walk(self.config.TRAINING_DATA_ROOT):
 			if root == self.config.TRAINING_DATA_ROOT:
 				folders.sort()
 				for folder in folders:
+					if stoppingCondition and self.totalTrainingExamples > stoppingCondition:
+						break
+  
 					print(f"::: Loading {folder} :::")
 					exampleTrack = self._loadTracks(root, folder)
      
