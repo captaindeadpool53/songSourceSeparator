@@ -244,25 +244,28 @@ class DatasetHandler:
 				for _ in range(batchSize):
 					if(trainingExampleCounter > self.totalTrainingExamples):
 						break
+					try:
+						trackData = savedSpectrogramFile[str(trainingExampleCounter)]
 
-					trackData = savedSpectrogramFile[str(trainingExampleCounter)]
+						x = np.array(trackData['mix'])
+						y = np.stack([
+							np.array(trackData['drums']), 
+							np.array(trackData['accompaniments'])
+							], -1)
 
-					x = np.array(trackData['mix'])
-					y = np.stack([
-						np.array(trackData['drums']), 
-						np.array(trackData['accompaniments'])
-						], -1)
+						if len(x.shape) == 2:
+							x = x[..., np.newaxis]
+						if len(x.shape) == 3: 		#New axis to concatenate the examples along
+							x = x[np.newaxis, ...]
+						if len(y.shape) == 3:
+							y = y[np.newaxis, ...]
 
-					if len(x.shape) == 2:
-						x = x[..., np.newaxis]
-					if len(x.shape) == 3: 		#New axis to concatenate the examples along
-						x = x[np.newaxis, ...]
-					if len(y.shape) == 3:
-						y = y[np.newaxis, ...]
+						batchX.append(x)
+						batchY.append(y)
 
-					batchX.append(x)
-					batchY.append(y)
-
+					except:
+						print(f"::: Key {trainingExampleCounter} not found. Skipping :::")
+					
 					trainingExampleCounter+=1
 
 			batchX = np.concatenate(batchX)
