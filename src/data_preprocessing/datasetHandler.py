@@ -410,7 +410,7 @@ class DatasetHandler:
 			random.shuffle(trackNames)
 			
 			for trackNumber, trackName in enumerate(trackNames):
-				savedSpectrogramFile.move(trackName, str(trackNumber))
+				savedSpectrogramFile.move(trackName, str(trackNumber+1))
 	
   
 	def visualiseSpectrogram(self, spectrogram: np.array):
