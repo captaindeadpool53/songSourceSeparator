@@ -373,7 +373,7 @@ class DatasetHandler:
 
 			self.convertToDataset()
 			self.splitDataset()
-			# self.cacheDataset()
+			self.cacheDataset()
 			return self.getDatasets()
 		else: 
 			self.loadPredictionData()
