@@ -30,6 +30,7 @@ class EvaluationHandler:
         
         return totalLoss
     
+    @tf.function
     @staticmethod
     def drumsLossFunction0(target: tf.Tensor,prediction: tf.Tensor) -> float:
         alpha =0
