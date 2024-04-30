@@ -59,7 +59,7 @@ class EvaluationHandler:
 
     @tf.function
     @staticmethod
-    def getLoss(alpha, target, prediction):
+    def getLoss(alpha: float, target: tf.Tensor,prediction: tf.Tensor) -> float:
         drumsTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 0] - target[..., 0]))
         accompanimentTrackLoss = tf.reduce_mean(tf.abs(prediction[..., 1] -target[...,1]))
 
