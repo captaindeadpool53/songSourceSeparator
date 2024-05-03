@@ -79,6 +79,7 @@ class UNET(Model):
 
 	def __init__(self, outputChannels):
 		super().__init__()
+		tf.random.set_seed(1234)
 		self.outputLayers = outputChannels
 
 		self.encoderBlock1 = UNET.EncoderBlock(32)
