@@ -11,7 +11,7 @@ class UNET(Model):
 			self.batchNormalisation = layers.BatchNormalization()
 			self.reluLayer = layers.Activation('relu')
 		
-		@tf.function
+		@tf.function(reduce_retracing=True)
 		def call(self, input: tf.Tensor)->tf.Tensor:
 			layerOutput = self.convLayer(input)
 			layerOutput = self.batchNormalisation(layerOutput)
@@ -27,7 +27,7 @@ class UNET(Model):
 			self.batchNormalisation = layers.BatchNormalization()
 			self.reluLayer = layers.Activation('relu')
 
-		@tf.function
+		@tf.function(reduce_retracing=True)
 		def call(self, input: tf.Tensor) -> tf.Tensor:
 			layerOutput = self.transposeConvBlock(input)
 			layerOutput = self.batchNormalisation(layerOutput)
@@ -43,7 +43,7 @@ class UNET(Model):
 			self.convBlock2 = UNET.ConvolutionalBlock(filters)
 			self.maxPoolLayer = layers.MaxPool2D(pool_size=(2,2), strides=(2,2))
 
-		@tf.function
+		@tf.function(reduce_retracing=True)
 		def call(self, input: tf.Tensor) -> tf.Tensor:
 			blockOutput = self.convBlock1(input)
 			skipConnectionOutput = self.convBlock2(blockOutput)
@@ -63,7 +63,7 @@ class UNET(Model):
 			self.tranConvBlock1 = UNET.transposeConvolutionalBlock(filters)
 			self.tranConvBlock2 = UNET.transposeConvolutionalBlock(filters)
 
-		@tf.function
+		@tf.function(reduce_retracing=True)
 		def call(self, input: tf.Tensor, skipConnection: tf.Tensor) -> tf.Tensor:
 			blockOutput = self.transposeConvBlock(input)
 			blockOutput = self.batchNormalisation(blockOutput)
@@ -100,7 +100,7 @@ class UNET(Model):
 		self.croppingValues: tuple
 
 
-	@tf.function
+	@tf.function(reduce_retracing=True)
 	def call(self, input: tf.Tensor)-> tf.Tensor:
 		input = self._padInputForDivisibility(input)
   
