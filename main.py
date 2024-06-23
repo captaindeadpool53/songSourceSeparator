@@ -3,7 +3,7 @@ import argparse
 from src.pipeline import PipelineHandler
 
 
-def main(projectDataRootPath, learningRate, alpha, weightDecay, epochs, batchSize):
+def main(projectDataRootPath, learningRate, alpha, weightDecay, optimizer, epochs, batchSize):
     pipelineHandler = PipelineHandler(
         FRAME_SIZE=2048,
         HOP_LENGTH=512,
@@ -16,6 +16,7 @@ def main(projectDataRootPath, learningRate, alpha, weightDecay, epochs, batchSiz
     pipelineHandler.trainModel(
         weightDecay = weightDecay,
         learningRate = learningRate,
+        optimizer = optimizer,
         alpha = alpha,
         epochs = epochs
     )
@@ -29,8 +30,9 @@ if __name__=="__main__":
     parser.add_argument("learningRate", type=float, help="Hyperparameter learning rate")
     parser.add_argument("alpha", type=float, help="Hyperparameter alpha to control the weight on the tracks in the loss function")
     parser.add_argument("weightDecay", type=float, help="Hyperparameter for regularisation")
+    parser.add_argument("optimizer", type=float, help="optimizer for training")
     parser.add_argument("epochs", type=int, help="epochs")
     parser.add_argument("batchSize", type=int, help="batchSize")
     
     args = parser.parse_args()
-    main(args.projectDataRootPath, args.learningRate, args.alpha, args.weightDecay, args.epochs, args.batchSize)
+    main(args.projectDataRootPath, args.learningRate, args.alpha, args.weightDecay, args.optimizer, args.epochs, args.batchSize)

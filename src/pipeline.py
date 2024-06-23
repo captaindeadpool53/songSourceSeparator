@@ -12,6 +12,7 @@ from tensorflow.keras.callbacks import Callback
 class PipelineHandler:
     defaultWeightDecay = 1e-6
     defaultLearningRate = 1e-3
+    defaultOptimizer = "adam"
     
     lossFunctionForAlpha = {
         0: EvaluationHandler.drumsLossFunction0,
@@ -21,6 +22,10 @@ class PipelineHandler:
         0.47: EvaluationHandler.drumsLossFunction47,
         0.79: EvaluationHandler.drumsLossFunction79,
         1: EvaluationHandler.drumsLossFunction1
+    }
+    optimizerForTraining = {
+        "adam" : tf.keras.optimizers.AdamW,
+        "sgd": tf.keras.optimizers.SGD
     }
 
     def __init__(self, SAMPLE_RATE, SEGMENT_LENGTH_IN_SECONDS, FRAME_SIZE, HOP_LENGTH, PROJECT_ROOT_PATH, BATCH_SIZE, NUMBER_OF_OUTPUT_CHANNELS = 2):
@@ -42,7 +47,7 @@ class PipelineHandler:
         self.trainingDataset, self.testDataset = self.datasetHandler.loadAndPreprocessData(type = Constants.TRAINING_DATA)
 
 
-    def trainModel(self, weightDecay=defaultWeightDecay, learningRate = defaultLearningRate, alpha = 0, epochs = 40):
+    def trainModel(self, weightDecay=defaultWeightDecay, learningRate = defaultLearningRate, optimizer=defaultOptimizer, alpha = 0, epochs = 40):
         self.unetModel = self._initiateModel()
 
         if os.path.exists(self.config.CHECKPOINT_PATH):
@@ -50,7 +55,8 @@ class PipelineHandler:
         
         self.lossFunction = PipelineHandler.lossFunctionForAlpha[alpha]
         
-        optimizer = tf.keras.optimizers.AdamW(weight_decay=weightDecay, learning_rate=learningRate)
+        optimizerFunction = PipelineHandler.optimizerForTraining[optimizer]
+        optimizer = optimizerFunction(weight_decay=weightDecay, learning_rate=learningRate)
         self.unetModel.compile(
             loss = self.lossFunction, 
             optimizer = optimizer
@@ -102,17 +108,9 @@ class PipelineHandler:
 
             self.unetModel = self._initiateModel()
             self._loadWeights()
-            optimizer = tf.keras.optimizers.AdamW(
-                weight_decay=PipelineHandler.defaultWeightDecay,
-                learning_rate=PipelineHandler.defaultLearningRate,
-            )
             print("::: Loading successful :::")
                 
-            print("::: Compiling and Predicting result :::")
-            self.unetModel.compile(
-                loss=self.lossFunction,
-                optimizer=optimizer,
-            )
+            print("::: Predicting result :::")
             predictedSpectrograms = self.unetModel.predict(predictionDataset)
 
             self.predictionDatasetHandler.postProcessAndSavePrediction(
