@@ -7,7 +7,7 @@ class UNET(Model):
 		def __init__(self, filters):
 			super().__init__()
 
-			self.convLayer = layers.Conv2D(filters=filters, kernel_size=3, padding="same",strides=(1, 1))
+			self.convLayer = layers.Conv2D(filters=filters, kernel_size=3, padding="same",strides=(1, 1), use_bias=False)
 			self.batchNormalisation = layers.BatchNormalization()
 			self.reluLayer = layers.Activation('relu')
 		
@@ -23,7 +23,7 @@ class UNET(Model):
 		def __init__(self, filters):
 			super().__init__()
 
-			self.transposeConvBlock = layers.Conv2DTranspose(filters=filters, kernel_size=(3,3), strides=(1,1), padding="same")
+			self.transposeConvBlock = layers.Conv2DTranspose(filters=filters, kernel_size=(3,3), strides=(1,1), padding="same", use_bias=False)
 			self.batchNormalisation = layers.BatchNormalization()
 			self.reluLayer = layers.Activation('relu')
 
@@ -56,7 +56,7 @@ class UNET(Model):
 		def __init__(self, filters):
 			super().__init__()
 
-			self.transposeConvBlock = layers.Conv2DTranspose(filters=filters, kernel_size=(5,5), strides=(2,2), padding="same")
+			self.transposeConvBlock = layers.Conv2DTranspose(filters=filters, kernel_size=(5,5), strides=(2,2), padding="same", use_bias = False)
 			self.batchNormalisation = layers.BatchNormalization()
 			self.reluLayer = layers.Activation('relu')
 			self.dropoutLayer = layers.Dropout(0.4)
@@ -95,7 +95,7 @@ class UNET(Model):
 		self.decoderBlock7  = UNET.DecoderBlock(64)
 		self.decoderBlock8  = UNET.DecoderBlock(32)
 
-		self.finalConvLayer = layers.Conv2D(filters=self.outputLayers, kernel_size=(1,1), padding="same", activation="relu") 
+		self.finalConvLayer = layers.Conv2D(filters=self.outputLayers, kernel_size=(1,1), padding="same", activation="relu", use_bias = False) 
 		
 		self.croppingValues: tuple
 
